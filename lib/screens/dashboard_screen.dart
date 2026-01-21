@@ -4,6 +4,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
+import 'add_category_screen.dart';
+import 'add_transaction_screen.dart';
+import 'category_detail_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -37,7 +40,7 @@ class DashboardScreen extends ConsumerWidget {
                 ref.read(selectedDateProvider.notifier).state = picked;
               }
             },
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -56,19 +59,50 @@ class DashboardScreen extends ConsumerWidget {
               // --- 2. Summary Cards ---
               Row(
                 children: [
-                  Expanded(child: _buildSummaryCard('Budget', totalBudget, Colors.blue)),
+                  Expanded(
+                    child: _buildSummaryCard(
+                      'Budget',
+                      totalBudget,
+                      Colors.blue,
+                    ),
+                  ),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildSummaryCard('Spent', totalSpent, Colors.red)),
+                  Expanded(
+                    child: _buildSummaryCard('Spent', totalSpent, Colors.red),
+                  ),
                   const SizedBox(width: 8),
-                  Expanded(child: _buildSummaryCard('Left', totalBudget - totalSpent, Colors.green)),
+                  Expanded(
+                    child: _buildSummaryCard(
+                      'Left',
+                      totalBudget - totalSpent,
+                      Colors.green,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 25),
 
               // --- 3. Category List Header ---
-              const Text(
-                "Category Breakdown",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Category Breakdown",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AddCategoryScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: const Text("Add Category"),
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
 
@@ -103,9 +137,14 @@ class DashboardScreen extends ConsumerWidget {
       // FAB to Add Transaction (Stubbed for now)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Trigger logic for Step 3 (Expense Input) later
-          // For now, let's just print to console
-          print("Open Add Transaction Modal");
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true, // Allows sheet to expand with keyboard
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (_) => const AddTransactionScreen(),
+          );
         },
         label: const Text("Add Expense"),
         icon: const Icon(Icons.add),
@@ -116,7 +155,8 @@ class DashboardScreen extends ConsumerWidget {
   // --- Helper Widgets ---
 
   Widget _buildPieChart(double totalBudget, double totalSpent) {
-    if (totalBudget == 0) return const Center(child: Text("Set a budget to see charts"));
+    if (totalBudget == 0)
+      return const Center(child: Text("Set a budget to see charts"));
 
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
 
@@ -130,7 +170,10 @@ class DashboardScreen extends ConsumerWidget {
             value: totalSpent,
             title: '${((totalSpent / totalBudget) * 100).toStringAsFixed(0)}%',
             radius: 50,
-            titleStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            titleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           PieChartSectionData(
             color: Colors.greenAccent,
@@ -150,7 +193,11 @@ class DashboardScreen extends ConsumerWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -159,7 +206,11 @@ class DashboardScreen extends ConsumerWidget {
           const SizedBox(height: 4),
           Text(
             '\$${amount.toStringAsFixed(0)}',
-            style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 16),
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
         ],
       ),
@@ -180,61 +231,80 @@ class _CategoryProgressItem extends StatelessWidget {
         : (spent / category.monthlyLimit).clamp(0.0, 1.0);
     final double moneyLeft = category.monthlyLimit - spent;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: category.color.withOpacity(0.2),
-                    child: Icon(Icons.category, color: category.color),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(category.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        '${(progress * 100).toStringAsFixed(0)}% used',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit.toStringAsFixed(0)}'),
-                  Text(
-                    '\$${moneyLeft.toStringAsFixed(0)} left',
-                    style: TextStyle(
+    return GestureDetector(
+      onTap: () {
+        // Navigate to Detail Screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryDetailScreen(category: category),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: category.color.withOpacity(0.2),
+                      child: Icon(Icons.category, color: category.color),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '${(progress * 100).toStringAsFixed(0)}% used',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit.toStringAsFixed(0)}',
+                    ),
+                    Text(
+                      '\$${moneyLeft.toStringAsFixed(0)} left',
+                      style: TextStyle(
                         fontSize: 12,
                         color: moneyLeft < 0 ? Colors.red : Colors.green,
-                        fontWeight: FontWeight.bold
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: Colors.grey[200],
-            color: category.color,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: Colors.grey[200],
+              color: category.color,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ],
+        ),
       ),
     );
   }

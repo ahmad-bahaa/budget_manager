@@ -1,0 +1,187 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import '../models/transaction_model.dart';
+import '../models/category_model.dart';
+import '../providers/budget_providers.dart';
+
+class AddTransactionScreen extends ConsumerStatefulWidget {
+  const AddTransactionScreen({super.key});
+
+  @override
+  ConsumerState<AddTransactionScreen> createState() => _AddTransactionScreenState();
+}
+
+class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
+
+  DateTime _selectedDate = DateTime.now();
+  int? _selectedCategoryId;
+
+  // Cleanup controllers
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  // --- Date Picker Logic ---
+  Future<void> _presentDatePicker() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    }
+  }
+
+  // --- Submit Logic ---
+  void _submitData() {
+    if (_formKey.currentState!.validate() && _selectedCategoryId != null) {
+      final enteredAmount = double.parse(_amountController.text);
+      final enteredNote = _noteController.text;
+
+      final newTransaction = TransactionModel(
+        amount: enteredAmount,
+        date: _selectedDate,
+        categoryId: _selectedCategoryId!,
+        note: enteredNote.isEmpty ? null : enteredNote,
+      );
+
+      // Save via Riverpod Notifier
+      ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
+
+      // Close the modal
+      Navigator.of(context).pop();
+    } else if (_selectedCategoryId == null) {
+      // Show error if no category selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch categories to populate dropdown
+    final categoriesState = ref.watch(categoriesProvider);
+
+    return Padding(
+      // Handle keyboard covering text fields
+      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // Wrap content height
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'New Expense',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+
+            // 1. Amount Field
+            TextFormField(
+              controller: _amountController,
+              decoration: const InputDecoration(
+                labelText: 'Amount',
+                prefixText: '\$ ',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Please enter an amount';
+                if (double.tryParse(value) == null) return 'Please enter a valid number';
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // 2. Category Dropdown
+            categoriesState.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (err, _) => Text('Error loading categories: $err'),
+              data: (categories) {
+                if (categories.isEmpty) {
+                  return const Text("No categories found. Please add one first.");
+                }
+                return DropdownButtonFormField<int>(
+                  decoration: const InputDecoration(
+                    labelText: 'Category',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: _selectedCategoryId,
+                  items: categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category.id,
+                      child: Row(
+                        children: [
+                          Icon(Icons.circle, color: category.color, size: 16),
+                          const SizedBox(width: 8),
+                          Text(category.name),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedCategoryId = value;
+                    });
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // 3. Date Picker Row
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Date: ${DateFormat.yMMMd().format(_selectedDate)}',
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _presentDatePicker,
+                  child: const Text('Choose Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+
+            // 4. Note Field (Optional)
+            TextFormField(
+              controller: _noteController,
+              decoration: const InputDecoration(
+                labelText: 'Note (Optional)',
+                icon: Icon(Icons.comment),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // 5. Submit Button
+            ElevatedButton(
+              onPressed: _submitData,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Add Transaction'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
