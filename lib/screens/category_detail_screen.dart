@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. MUST IMPORT THIS
 import 'package:intl/intl.dart';
@@ -44,16 +46,19 @@ class CategoryDetailScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
-          _buildHeader(category),
+          _buildHeader(category, ref),
           const Padding(
             padding: EdgeInsets.all(16.0),
-            child: Text("Transaction History",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: Text(
+              "Transaction History",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
           Expanded(
             child: FutureBuilder<List<TransactionModel>>(
               future: DatabaseHelper.instance.getTransactionsByCategory(
-                  category.id!),
+                category.id!,
+              ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting)
                   return const CircularProgressIndicator();
@@ -95,9 +100,13 @@ class CategoryDetailScreen extends ConsumerWidget {
                         leading: Icon(category.icon, color: category.color),
                         title: Text(tx.note ?? 'Expense'),
                         subtitle: Text(DateFormat.yMMMd().format(tx.date)),
-                        trailing: Text('-\$${tx.amount.toStringAsFixed(2)}',
-                            style: const TextStyle(color: Colors.red,
-                                fontWeight: FontWeight.bold)),
+                        trailing: Text(
+                          '-\$${tx.amount.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         onLongPress: () {
                           // EDIT TRANSACTION LOGIC (Optional next step)
                           print("Edit Transaction ${tx.id}");
@@ -116,7 +125,11 @@ class CategoryDetailScreen extends ConsumerWidget {
 
   // --- Helper Widgets & Dialogs ---
 
-  Widget _buildHeader(CategoryModel category) {
+  Widget _buildHeader(CategoryModel category, WidgetRef ref) {
+    final spendingByCategory = ref.watch(categorySpendingProvider);
+    final spent = spendingByCategory[category.id] ?? 0.0;
+    final double remaining = category.monthlyLimit - spent;
+
     return Container(
       padding: const EdgeInsets.all(20),
       color: category.color.withOpacity(0.1),
@@ -125,10 +138,35 @@ class CategoryDetailScreen extends ConsumerWidget {
           children: [
             Icon(category.icon, size: 40, color: category.color),
             const SizedBox(height: 8),
-            Text("\$${category.monthlyLimit.toStringAsFixed(0)} Budget",
-                style: TextStyle(fontSize: 20,
+            Text(
+              "Budget: \$${category.monthlyLimit.toStringAsFixed(0)} ",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: category.color,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  " Spent: \$${spent.toStringAsFixed(0)}   ",
+                  style: TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: category.color)),
+                    color: Colors.red,
+                  ),
+                ),
+                Text(
+                  " Remaining:  \$${remaining.toStringAsFixed(0)} ",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: remaining <= 0 ? Colors.red : Colors.green,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -138,47 +176,50 @@ class CategoryDetailScreen extends ConsumerWidget {
   void _confirmDelete(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (ctx) =>
-          AlertDialog(
-            title: const Text("Delete Category?"),
-            content: const Text(
-                "This will delete all transactions in this category."),
-            actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx),
-                  child: const Text("Cancel")),
-              ElevatedButton(
-                onPressed: ()  {
-                  // Use the ID from the category object
-                   ref.read(categoriesProvider.notifier).deleteCategory(
-                      category.id!);
-                  Navigator.pop(ctx); // Close dialog
-                  Navigator.pop(context); // Go back to Dashboard
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text(
-                    "Delete", style: TextStyle(color: Colors.white)),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: const Text("Delete Category?"),
+        content: const Text(
+          "This will delete all transactions in this category.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancel"),
           ),
+          ElevatedButton(
+            onPressed: () {
+              // Use the ID from the category object
+              ref
+                  .read(categoriesProvider.notifier)
+                  .deleteCategory(category.id!);
+              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(context); // Go back to Dashboard
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Delete", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 }
 
-
 Future<bool?> _showDeleteConfirmation(BuildContext context) {
   return showDialog<bool>(
     context: context,
-    builder: (context) =>
-        AlertDialog(
-          title: const Text("Delete Transaction?"),
-          content: const Text("This action cannot be undone."),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false),
-                child: const Text("CANCEL")),
-            TextButton(onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                    "DELETE", style: TextStyle(color: Colors.red))),
-          ],
+    builder: (context) => AlertDialog(
+      title: const Text("Delete Transaction?"),
+      content: const Text("This action cannot be undone."),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text("CANCEL"),
         ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text("DELETE", style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
   );
 }

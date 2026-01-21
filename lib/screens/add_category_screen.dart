@@ -23,12 +23,12 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
     Icons.shopping_cart,
     Icons.directions_car,
     Icons.home,
-    Icons.movie,
+    Icons.health_and_safety,
     Icons.medical_services,
     Icons.school,
     Icons.fitness_center,
-    Icons.redeem,
-    Icons.flight,
+    Icons.card_giftcard,
+    Icons.person,
   ];
 
   late int _selectedIconCode;

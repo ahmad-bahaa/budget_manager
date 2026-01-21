@@ -6,6 +6,7 @@ import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
 import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
+import 'all_transactions_screen.dart';
 import 'category_detail_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -37,7 +38,9 @@ class DashboardScreen extends ConsumerWidget {
                 lastDate: DateTime(2030),
               );
               if (picked != null) {
-                ref.read(selectedDateProvider.notifier).state = picked;
+                ref
+                    .read(selectedDateProvider.notifier)
+                    .state = picked;
               }
             },
           ),
@@ -68,7 +71,17 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: _buildSummaryCard('Spent', totalSpent, Colors.red),
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const AllTransactionsScreen()),
+                          );
+
+                        },
+                        child: _buildSummaryCard(
+                            'Spent', totalSpent, Colors.red)),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -283,7 +296,8 @@ class _CategoryProgressItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit.toStringAsFixed(0)}',
+                      '\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit
+                          .toStringAsFixed(0)}',
                     ),
                     Text(
                       '\$${moneyLeft.toStringAsFixed(0)} left',
