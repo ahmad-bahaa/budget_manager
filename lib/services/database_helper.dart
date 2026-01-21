@@ -39,7 +39,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         monthly_limit REAL NOT NULL,
-        color_hex TEXT NOT NULL
+        color_hex TEXT NOT NULL,
+        icon_code INTEGER NOT NULL
       )
     ''');
 
@@ -59,12 +60,14 @@ class DatabaseHelper {
     await db.insert('categories', {
       'name': 'Food',
       'monthly_limit': 500.0,
-      'color_hex': '0xFFFF5722', // Deep Orange
+      'color_hex': '0xFFFF5722',
+      'icon_code': '57672',
     });
     await db.insert('categories', {
       'name': 'Rent',
       'monthly_limit': 1200.0,
       'color_hex': '0xFF3F51B5', // Indigo
+      'icon_code':'57672',
     });
   }
 
@@ -153,5 +156,19 @@ class DatabaseHelper {
       INNER JOIN categories c ON t.category_id = c.id
       ORDER BY t.date DESC
     ''');
+  }
+
+  // Inside DatabaseHelper class
+
+// Generic Update
+  Future<int> update(String table, Map<String, dynamic> data) async {
+    final db = await instance.database;
+    return await db.update(table, data, where: 'id = ?', whereArgs: [data['id']]);
+  }
+
+// Generic Delete
+  Future<int> delete(String table, int id) async {
+    final db = await instance.database;
+    return await db.delete(table, where: 'id = ?', whereArgs: [id]);
   }
 }

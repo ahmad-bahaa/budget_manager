@@ -45,7 +45,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   }
 
   // --- Submit Logic ---
-  void _submitData() {
+  Future<void> _submitData() async {
     if (_formKey.currentState!.validate() && _selectedCategoryId != null) {
       final enteredAmount = double.parse(_amountController.text);
       final enteredNote = _noteController.text;
@@ -58,7 +58,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
 
       // Save via Riverpod Notifier
-      ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
+      await ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
 
       // Close the modal
       Navigator.of(context).pop();

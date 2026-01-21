@@ -130,6 +130,7 @@ class DashboardScreen extends ConsumerWidget {
                   );
                 },
               ),
+              const SizedBox(height: 50),
             ],
           ),
         ),
@@ -155,8 +156,9 @@ class DashboardScreen extends ConsumerWidget {
   // --- Helper Widgets ---
 
   Widget _buildPieChart(double totalBudget, double totalSpent) {
-    if (totalBudget == 0)
+    if (totalBudget == 0) {
       return const Center(child: Text("Set a budget to see charts"));
+    }
 
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
 
@@ -256,7 +258,7 @@ class _CategoryProgressItem extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       backgroundColor: category.color.withOpacity(0.2),
-                      child: Icon(Icons.category, color: category.color),
+                      child: Icon(category.icon, color: category.color),
                     ),
                     const SizedBox(width: 12),
                     Column(

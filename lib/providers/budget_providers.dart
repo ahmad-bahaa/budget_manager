@@ -8,7 +8,8 @@ import '../services/database_helper.dart';
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 
 // 2. Categories Provider (AsyncNotifier pattern)
-class CategoriesNotifier extends StateNotifier<AsyncValue<List<CategoryModel>>> {
+class CategoriesNotifier
+    extends StateNotifier<AsyncValue<List<CategoryModel>>> {
   CategoriesNotifier() : super(const AsyncValue.loading()) {
     _fetchCategories();
   }
@@ -24,17 +25,30 @@ class CategoriesNotifier extends StateNotifier<AsyncValue<List<CategoryModel>>> 
 
   Future<void> addCategory(CategoryModel category) async {
     await DatabaseHelper.instance.createCategory(category);
-    _fetchCategories(); // Refresh list
+    await _fetchCategories(); // Refresh list
+  }
+
+  Future<void> updateCategory(CategoryModel category) async {
+    if (category.id == null) return;
+    await DatabaseHelper.instance.update('categories', category.toMap());
+    await _fetchCategories();
+  }
+
+  Future<void> deleteCategory(int id) async {
+    await DatabaseHelper.instance.delete('categories', id);
+    await _fetchCategories();
   }
 }
 
 final categoriesProvider =
-StateNotifierProvider<CategoriesNotifier, AsyncValue<List<CategoryModel>>>(
-        (ref) => CategoriesNotifier());
+    StateNotifierProvider<CategoriesNotifier, AsyncValue<List<CategoryModel>>>(
+      (ref) => CategoriesNotifier(),
+    );
 
 // 3. Transactions Provider (AsyncNotifier pattern)
 // Listens to selectedDateProvider to filter data automatically.
-class TransactionsNotifier extends StateNotifier<AsyncValue<List<TransactionModel>>> {
+class TransactionsNotifier
+    extends StateNotifier<AsyncValue<List<TransactionModel>>> {
   final Ref ref;
 
   TransactionsNotifier(this.ref) : super(const AsyncValue.loading()) {
@@ -45,7 +59,9 @@ class TransactionsNotifier extends StateNotifier<AsyncValue<List<TransactionMode
     state = const AsyncValue.loading();
     try {
       final date = ref.read(selectedDateProvider);
-      final transactions = await DatabaseHelper.instance.getTransactionsByMonth(date);
+      final transactions = await DatabaseHelper.instance.getTransactionsByMonth(
+        date,
+      );
       state = AsyncValue.data(transactions);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -58,12 +74,25 @@ class TransactionsNotifier extends StateNotifier<AsyncValue<List<TransactionMode
   }
 
   // Call this when the user changes the month
-  void refresh() => _fetchTransactions();
+  Future<void> refresh() async => await _fetchTransactions();
+
+  Future<void> updateTransaction(TransactionModel transaction) async {
+    await DatabaseHelper.instance.update('transactions', transaction.toMap());
+
+     await _fetchTransactions(); // Refresh list to update UI
+  }
+
+  Future<void> deleteTransaction(int id) async {
+    await DatabaseHelper.instance.delete('transactions', id);
+    await _fetchTransactions(); // Refresh list to update UI
+  }
 }
 
 final transactionsProvider =
-StateNotifierProvider<TransactionsNotifier, AsyncValue<List<TransactionModel>>>(
-        (ref) {
+    StateNotifierProvider<
+      TransactionsNotifier,
+      AsyncValue<List<TransactionModel>>
+    >((ref) {
       // Watch the date provider so we re-fetch if the user changes the month
       ref.watch(selectedDateProvider);
       return TransactionsNotifier(ref);
@@ -75,7 +104,8 @@ StateNotifierProvider<TransactionsNotifier, AsyncValue<List<TransactionModel>>>(
 final totalBudgetProvider = Provider<double>((ref) {
   final categoriesState = ref.watch(categoriesProvider);
   return categoriesState.maybeWhen(
-    data: (categories) => categories.fold(0, (sum, item) => sum + item.monthlyLimit),
+    data: (categories) =>
+        categories.fold(0, (sum, item) => sum + item.monthlyLimit),
     orElse: () => 0.0,
   );
 });
@@ -84,7 +114,8 @@ final totalBudgetProvider = Provider<double>((ref) {
 final totalSpentProvider = Provider<double>((ref) {
   final transactionsState = ref.watch(transactionsProvider);
   return transactionsState.maybeWhen(
-    data: (transactions) => transactions.fold(0, (sum, item) => sum + item.amount),
+    data: (transactions) =>
+        transactions.fold(0, (sum, item) => sum + item.amount),
     orElse: () => 0.0,
   );
 });

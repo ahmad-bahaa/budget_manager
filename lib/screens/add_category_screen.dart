@@ -4,7 +4,9 @@ import '../models/category_model.dart';
 import '../providers/budget_providers.dart';
 
 class AddCategoryScreen extends ConsumerStatefulWidget {
-  const AddCategoryScreen({super.key});
+  final CategoryModel? categoryToEdit;
+
+  const AddCategoryScreen({super.key, this.categoryToEdit});
 
   @override
   ConsumerState<AddCategoryScreen> createState() => _AddCategoryScreenState();
@@ -14,6 +16,22 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _limitController = TextEditingController();
+
+  // ... inside state class ...
+  final List<IconData> _icons = [
+    Icons.restaurant,
+    Icons.shopping_cart,
+    Icons.directions_car,
+    Icons.home,
+    Icons.movie,
+    Icons.medical_services,
+    Icons.school,
+    Icons.fitness_center,
+    Icons.redeem,
+    Icons.flight,
+  ];
+
+  late int _selectedIconCode;
 
   // Predefined colors for the user to pick from
   final List<String> _colorPalette = [
@@ -40,6 +58,18 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
   String _selectedColorHex = '0xFF2196F3'; // Default Blue
 
   @override
+  void initState() {
+    super.initState();
+    // Initialize with existing data if editing
+    _nameController.text = widget.categoryToEdit?.name ?? '';
+    _limitController.text =
+        widget.categoryToEdit?.monthlyLimit.toString() ?? '';
+    _selectedColorHex = widget.categoryToEdit?.colorHex ?? '0xFF2196F3';
+    _selectedIconCode =
+        widget.categoryToEdit?.iconCode ?? Icons.category.codePoint;
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _limitController.dispose();
@@ -51,15 +81,34 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
       final name = _nameController.text;
       final limit = double.parse(_limitController.text);
 
-      final newCategory = CategoryModel(
+      // 1. Create the model object
+      final categoryData = CategoryModel(
+        // Use existing ID if editing, otherwise let SQLite handle it (null)
+        id: widget.categoryToEdit?.id,
         name: name,
         monthlyLimit: limit,
         colorHex: _selectedColorHex,
+        iconCode: _selectedIconCode, // From the icon picker
       );
 
-      // Save via Riverpod
-      ref.read(categoriesProvider.notifier).addCategory(newCategory);
+      // 2. Decide which Provider method to call
+      if (widget.categoryToEdit != null) {
+        // EDIT MODE
+        ref.read(categoriesProvider.notifier).updateCategory(categoryData);
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Category updated successfully')),
+        );
+      } else {
+        // ADD MODE
+        ref.read(categoriesProvider.notifier).addCategory(categoryData);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Category created successfully')),
+        );
+      }
+
+      // 3. Close the screen
       Navigator.of(context).pop();
     }
   }
@@ -68,7 +117,9 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Category'),
+        title: (widget.categoryToEdit != null)
+            ? Text('Edit Category')
+            : Text('New Category'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -88,7 +139,8 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                     prefixIcon: Icon(Icons.label),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter a name';
+                    if (value == null || value.isEmpty)
+                      return 'Please enter a name';
                     return null;
                   },
                 ),
@@ -103,13 +155,19 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.attach_money),
                   ),
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Please enter a limit';
-                    if (double.tryParse(value) == null) return 'Please enter a valid number';
+                    if (value == null || value.isEmpty)
+                      return 'Please enter a limit';
+                    if (double.tryParse(value) == null)
+                      return 'Please enter a valid number';
                     return null;
                   },
                 ),
+                const SizedBox(height: 24),
+                _buildIconPicker(),
                 const SizedBox(height: 24),
 
                 // 3. Color Picker
@@ -144,7 +202,7 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                               color: Colors.black.withOpacity(0.1),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
-                            )
+                            ),
                           ],
                         ),
                         child: isSelected
@@ -165,10 +223,23 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Color(int.parse(_selectedColorHex)),
                     ),
-                    child: const Text(
-                        'Create Category',
-                        style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)
-                    ),
+                    child: (widget.categoryToEdit != null)
+                        ? Text(
+                            'Save Changes',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        : Text(
+                            'Create Category',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],
@@ -176,6 +247,20 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // UI for Icon Picker
+  Widget _buildIconPicker() {
+    return Wrap(
+      spacing: 12,
+      children: _icons.map((icon) {
+        final isSelected = _selectedIconCode == icon.codePoint;
+        return IconButton(
+          icon: Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+          onPressed: () => setState(() => _selectedIconCode = icon.codePoint),
+        );
+      }).toList(),
     );
   }
 }
