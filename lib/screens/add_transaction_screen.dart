@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:math_expressions/math_expressions.dart';
 import '../models/transaction_model.dart';
 import '../models/category_model.dart';
 import '../providers/budget_providers.dart';
@@ -9,7 +10,8 @@ class AddTransactionScreen extends ConsumerStatefulWidget {
   const AddTransactionScreen({super.key});
 
   @override
-  ConsumerState<AddTransactionScreen> createState() => _AddTransactionScreenState();
+  ConsumerState<AddTransactionScreen> createState() =>
+      _AddTransactionScreenState();
 }
 
 class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
@@ -58,15 +60,17 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       );
 
       // Save via Riverpod Notifier
-      await ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
+      await ref
+          .read(transactionsProvider.notifier)
+          .addTransaction(newTransaction);
 
       // Close the modal
       Navigator.of(context).pop();
     } else if (_selectedCategoryId == null) {
       // Show error if no category selected
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
     }
   }
 
@@ -77,7 +81,12 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
     return Padding(
       // Handle keyboard covering text fields
-      padding: EdgeInsets.fromLTRB(16, 16, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        16,
+        16,
+        MediaQuery.of(context).viewInsets.bottom + 16,
+      ),
       child: Form(
         key: _formKey,
         child: Column(
@@ -94,15 +103,39 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             // 1. Amount Field
             TextFormField(
               controller: _amountController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Amount',
                 prefixText: '\$ ',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    _amountController.clear();
+                  },
+                  icon:  Icon(Icons.backspace_outlined),
+                ),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               validator: (value) {
-                if (value == null || value.isEmpty) return 'Please enter an amount';
-                if (double.tryParse(value) == null) return 'Please enter a valid number';
+                if (value!.contains('+') || value.contains('-') || value.contains('*') || value.contains('/')) {
+                  // 1. Parse the expression
+                  Parser p = Parser();
+                  Expression exp = p.parse(value);
+
+                  // 2. Evaluate the expression
+                  ContextModel cm = ContextModel();
+                  double eval = exp.evaluate(EvaluationType.REAL, cm);
+                  _amountController.text = eval.toString();
+                  return null;
+                }
+                if (value == null || value.isEmpty) {
+                  return 'Please enter an amount';
+                }
+                if (double.tryParse(value) == null) {
+                  return 'Please enter a valid number';
+                }
                 return null;
               },
             ),
@@ -114,7 +147,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               error: (err, _) => Text('Error loading categories: $err'),
               data: (categories) {
                 if (categories.isEmpty) {
-                  return const Text("No categories found. Please add one first.");
+                  return const Text(
+                    "No categories found. Please add one first.",
+                  );
                 }
                 return DropdownButtonFormField<int>(
                   decoration: const InputDecoration(
@@ -155,7 +190,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 ),
                 TextButton(
                   onPressed: _presentDatePicker,
-                  child: const Text('Choose Date', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Choose Date',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -175,7 +213,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               onPressed: _submitData,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               child: const Text('Add Transaction'),
             ),

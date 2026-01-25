@@ -36,6 +36,7 @@ dependencies:
   path: ^1.9.1
   intl: ^0.20.2
   flutter_native_splash: ^2.4.0
+  math_expressions: ^2.5.0
 
 
 
@@ -48,6 +49,7 @@ dev_dependencies:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.0
+
 
 
 
