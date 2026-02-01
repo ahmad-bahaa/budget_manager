@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/dashboard_screen.dart';
-import 'services/notification_service.dart'; // Import the service
 
 void main() async {
   // Ensure Flutter bindings are initialized before database setup
   WidgetsFlutterBinding.ensureInitialized();
-  // 1. Initialize Notification Service
-  final notificationService = NotificationService();
-  await notificationService.init();
-
-  // 2. Request Permissions (Android 13+) & Schedule
-  await notificationService.requestPermissions();
-  await notificationService.scheduleDailyNotification();
+  // // 1. Initialize Notification Service
+  // final notificationService = NotificationService();
+  // await notificationService.init();
+  //
+  // // 2. Request Permissions (Android 13+) & Schedule
+  // await notificationService.requestPermissions();
+  // await notificationService.scheduleDailyNotification();
 
   runApp(
     // ProviderScope is required to store the state of all Riverpod providers
