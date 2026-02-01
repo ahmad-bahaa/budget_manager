@@ -131,7 +131,7 @@ class DashboardScreen extends ConsumerWidget {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final category = categories[index];
                       final spent = spendingByCategory[category.id] ?? 0.0;

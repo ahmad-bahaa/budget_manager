@@ -139,8 +139,9 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                     prefixIcon: Icon(Icons.label),
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter a name';
+                    }
                     return null;
                   },
                 ),
@@ -159,10 +160,12 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                     decimal: true,
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter a limit';
-                    if (double.tryParse(value) == null)
+                    }
+                    if (double.tryParse(value) == null) {
                       return 'Please enter a valid number';
+                    }
                     return null;
                   },
                 ),
@@ -199,7 +202,7 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                               : null,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CategoryModel {
@@ -31,10 +30,13 @@ class CategoryModel {
       id: map['id'] as int?,
       name: map['name'] as String,
       monthlyLimit: (map['monthly_limit'] as num).toDouble(),
-      colorHex: map['color_hex'] as  String,
-      iconCode: map['icon_code'] as int? ?? Icons.category.codePoint, // Fallback
+      colorHex: map['color_hex'] as String,
+      iconCode:
+          map['icon_code'] as int? ?? Icons.category.codePoint, // Fallback
     );
   }
+
+  // static const IconData myIcon = Icons.home; // Or use 'const' keyword
 
   // Helper to get IconData
   IconData get icon => IconData(iconCode, fontFamily: 'MaterialIcons');

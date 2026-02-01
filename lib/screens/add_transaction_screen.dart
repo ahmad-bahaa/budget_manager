@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import '../models/transaction_model.dart';
-import '../models/category_model.dart';
 import '../providers/budget_providers.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
-  const AddTransactionScreen({super.key});
+  final TransactionModel? transactionToEdit; // If null, we are adding new
+  const AddTransactionScreen({super.key, this.transactionToEdit});
 
   @override
   ConsumerState<AddTransactionScreen> createState() =>
@@ -18,7 +18,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-
   DateTime _selectedDate = DateTime.now();
   int? _selectedCategoryId;
 
@@ -28,6 +27,19 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill data if editing
+    if (widget.transactionToEdit != null) {
+      final tx = widget.transactionToEdit!;
+      _amountController.text = tx.amount.toString();
+      _noteController.text = tx.note ?? '';
+      _selectedDate = tx.date;
+      _selectedCategoryId = tx.categoryId;
+    }
   }
 
   // --- Date Picker Logic ---
@@ -53,19 +65,37 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       final enteredNote = _noteController.text;
 
       final newTransaction = TransactionModel(
+        id: widget.transactionToEdit?.id,
         amount: enteredAmount,
         date: _selectedDate,
         categoryId: _selectedCategoryId!,
         note: enteredNote.isEmpty ? null : enteredNote,
       );
+      if (widget.transactionToEdit != null) {
+        // EDIT MODE
+        ref
+            .read(transactionsProvider.notifier)
+            .updateTransaction(newTransaction);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Transaction updated!')));
+      } else {
+        // ADD MODE
+        ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Transaction added!')));
+      }
 
-      // Save via Riverpod Notifier
-      await ref
-          .read(transactionsProvider.notifier)
-          .addTransaction(newTransaction);
-
-      // Close the modal
       Navigator.of(context).pop();
+
+      // // Save via Riverpod Notifier
+      // await ref
+      //     .read(transactionsProvider.notifier)
+      //     .addTransaction(newTransaction);
+      //
+      // // Close the modal
+      // Navigator.of(context).pop();
     } else if (_selectedCategoryId == null) {
       // Show error if no category selected
       ScaffoldMessenger.of(
@@ -93,8 +123,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           mainAxisSize: MainAxisSize.min, // Wrap content height
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'New Expense',
+            Text(
+              widget.transactionToEdit != null
+                  ? 'Edit Transaction'
+                  : 'New Expense',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -111,7 +143,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   onPressed: () {
                     _amountController.clear();
                   },
-                  icon:  Icon(Icons.backspace_outlined),
+                  icon: Icon(Icons.backspace_outlined),
                 ),
               ),
 
@@ -119,7 +151,10 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 decimal: true,
               ),
               validator: (value) {
-                if (value!.contains('+') || value.contains('-') || value.contains('*') || value.contains('/')) {
+                if (value!.contains('+') ||
+                    value.contains('-') ||
+                    value.contains('*') ||
+                    value.contains('/')) {
                   // 1. Parse the expression
                   Parser p = Parser();
                   Expression exp = p.parse(value);
@@ -130,7 +165,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   _amountController.text = eval.toString();
                   return null;
                 }
-                if (value == null || value.isEmpty) {
+                if (value.isEmpty) {
                   return 'Please enter an amount';
                 }
                 if (double.tryParse(value) == null) {
@@ -156,7 +191,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     labelText: 'Category',
                     border: OutlineInputBorder(),
                   ),
-                  value: _selectedCategoryId,
+                  initialValue: _selectedCategoryId,
                   items: categories.map((category) {
                     return DropdownMenuItem(
                       value: category.id,
@@ -217,7 +252,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text('Add Transaction'),
+              child: Text(
+                widget.transactionToEdit != null
+                    ? 'Update Transaction'
+                    : 'Add Transaction',
+              ),
             ),
           ],
         ),

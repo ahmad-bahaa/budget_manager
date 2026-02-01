@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../models/transaction_model.dart';
 import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
 import 'add_transaction_screen.dart'; // Import for Edit functionality
@@ -33,7 +32,7 @@ class AllTransactionsScreen extends ConsumerWidget {
                 ref.read(selectedDateProvider.notifier).state = picked;
               }
             },
-          )
+          ),
         ],
       ),
       body: transactionsAsync.when(
@@ -57,13 +56,13 @@ class AllTransactionsScreen extends ConsumerWidget {
               // Find the category for this transaction to get the icon/color
               // We use maybeWhen/data to safely access the loaded categories
               final category = categoriesAsync.asData?.value.firstWhere(
-                    (c) => c.id == tx.categoryId,
+                (c) => c.id == tx.categoryId,
                 orElse: () => CategoryModel(
-                    id: -1,
-                    name: 'Unknown',
-                    monthlyLimit: 0,
-                    colorHex: '0xFF9E9E9E',
-                    iconCode: Icons.help_outline.codePoint
+                  id: -1,
+                  name: 'Unknown',
+                  monthlyLimit: 0,
+                  colorHex: '0xFF9E9E9E',
+                  iconCode: Icons.help_outline.codePoint,
                 ),
               );
 
@@ -88,22 +87,33 @@ class AllTransactionsScreen extends ConsumerWidget {
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                          child: const Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                     ),
                   );
                 },
                 onDismissed: (_) {
-                  ref.read(transactionsProvider.notifier).deleteTransaction(tx.id!);
+                  ref
+                      .read(transactionsProvider.notifier)
+                      .deleteTransaction(tx.id!);
                 },
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: category?.color.withOpacity(0.1) ?? Colors.grey[200],
-                    child: Icon(category?.icon ?? Icons.help, color: category?.color ?? Colors.grey),
+                    backgroundColor:
+                        category?.color.withOpacity(0.1) ?? Colors.grey[200],
+                    child: Icon(
+                      category?.icon ?? Icons.help,
+                      color: category?.color ?? Colors.grey,
+                    ),
                   ),
                   title: Text(
-                    tx.note != null && tx.note!.isNotEmpty ? tx.note! : category?.name ?? 'Expense',
+                    tx.note != null && tx.note!.isNotEmpty
+                        ? tx.note!
+                        : category?.name ?? 'Expense',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   subtitle: Text(DateFormat('MMM d, y').format(tx.date)),
@@ -117,7 +127,17 @@ class AllTransactionsScreen extends ConsumerWidget {
                   ),
                   // Optional: Tap to Edit (Reuse AddTransactionScreen logic if you implemented edit support there)
                   onTap: () {
-                    // Navigate to Edit Screen
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      // Allows sheet to expand with keyboard
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                      ),
+                      builder: (_) => AddTransactionScreen(transactionToEdit: tx),
+                    );
                   },
                 ),
               );

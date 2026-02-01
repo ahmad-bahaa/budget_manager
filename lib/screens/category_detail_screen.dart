@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // 1. MUST IMPORT THIS
 import 'package:intl/intl.dart';
@@ -7,7 +5,8 @@ import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/database_helper.dart';
 import '../providers/budget_providers.dart';
-import 'add_category_screen.dart'; // 2. MUST IMPORT YOUR PROVIDERS
+import 'add_category_screen.dart';
+import 'add_transaction_screen.dart'; // 2. MUST IMPORT YOUR PROVIDERS
 
 // 3. Change StatelessWidget to ConsumerWidget
 class CategoryDetailScreen extends ConsumerWidget {
@@ -60,10 +59,12 @@ class CategoryDetailScreen extends ConsumerWidget {
                 category.id!,
               ),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting)
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
-                if (!snapshot.hasData || snapshot.data!.isEmpty)
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text("No transactions."));
+                }
 
                 final transactions = snapshot.data!;
 
@@ -107,9 +108,19 @@ class CategoryDetailScreen extends ConsumerWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        onLongPress: () {
-                          // EDIT TRANSACTION LOGIC (Optional next step)
-                          print("Edit Transaction ${tx.id}");
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            // Allows sheet to expand with keyboard
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            builder: (_) =>
+                                AddTransactionScreen(transactionToEdit: tx),
+                          );
                         },
                       ),
                     );
