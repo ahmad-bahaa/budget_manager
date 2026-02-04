@@ -115,6 +115,8 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final currency = ref.watch(currencyProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: (widget.categoryToEdit != null)
@@ -150,11 +152,11 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 // 2. Limit Input
                 TextFormField(
                   controller: _limitController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Monthly Limit',
-                    prefixText: '\$ ',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.attach_money),
+                    prefixText:  currency,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.monetization_on),
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,

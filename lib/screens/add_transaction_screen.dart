@@ -108,6 +108,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Widget build(BuildContext context) {
     // Watch categories to populate dropdown
     final categoriesState = ref.watch(categoriesProvider);
+    final currency = ref.watch(currencyProvider);
 
     return Padding(
       // Handle keyboard covering text fields
@@ -137,7 +138,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               controller: _amountController,
               decoration: InputDecoration(
                 labelText: 'Amount',
-                prefixText: '\$ ',
+                prefixText: currency,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   onPressed: () {

@@ -1,3 +1,4 @@
+import 'package:budget_manager/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -20,7 +21,7 @@ class DashboardScreen extends ConsumerWidget {
     final categoriesAsync = ref.watch(categoriesProvider);
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final currentDate = ref.watch(selectedDateProvider);
-
+    final currency = ref.watch(currencyProvider); // Watch the provider
     return Scaffold(
       backgroundColor: Colors.grey[100], // Light background
       appBar: AppBar(
@@ -43,6 +44,10 @@ class DashboardScreen extends ConsumerWidget {
                     .state = picked;
               }
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
         ],
       ),
@@ -67,6 +72,7 @@ class DashboardScreen extends ConsumerWidget {
                       'Budget',
                       totalBudget,
                       Colors.blue,
+                        currency
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -81,7 +87,7 @@ class DashboardScreen extends ConsumerWidget {
 
                         },
                         child: _buildSummaryCard(
-                            'Spent', totalSpent, Colors.red)),
+                            'Spent', totalSpent, Colors.red,currency)),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -89,6 +95,7 @@ class DashboardScreen extends ConsumerWidget {
                       'Left',
                       totalBudget - totalSpent,
                       Colors.green,
+                        currency
                     ),
                   ),
                 ],
@@ -138,6 +145,7 @@ class DashboardScreen extends ConsumerWidget {
                       return _CategoryProgressItem(
                         category: category,
                         spent: spent,
+                        currency: currency,
                       );
                     },
                   );
@@ -201,7 +209,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(String title, double amount, Color color) {
+  Widget _buildSummaryCard(String title, double amount, Color color,String currency) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -220,7 +228,7 @@ class DashboardScreen extends ConsumerWidget {
           Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
           const SizedBox(height: 4),
           Text(
-            '\$${amount.toStringAsFixed(0)}',
+            '${currency}${amount.toStringAsFixed(0)}',
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.bold,
@@ -236,8 +244,10 @@ class DashboardScreen extends ConsumerWidget {
 class _CategoryProgressItem extends StatelessWidget {
   final CategoryModel category;
   final double spent;
+  final String currency;
 
-  const _CategoryProgressItem({required this.category, required this.spent});
+
+  const _CategoryProgressItem({required this.category, required this.spent,required this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -296,11 +306,11 @@ class _CategoryProgressItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit
+                      '${currency}${spent.toStringAsFixed(0)} / ${currency}${category.monthlyLimit
                           .toStringAsFixed(0)}',
                     ),
                     Text(
-                      '\$${moneyLeft.toStringAsFixed(0)} left',
+                      '${currency}${moneyLeft.toStringAsFixed(0)} left',
                       style: TextStyle(
                         fontSize: 12,
                         color: moneyLeft < 0 ? Colors.red : Colors.green,

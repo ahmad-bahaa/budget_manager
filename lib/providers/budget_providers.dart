@@ -1,3 +1,4 @@
+import 'package:budget_manager/services/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/category_model.dart';
@@ -135,3 +136,48 @@ final categorySpendingProvider = Provider<Map<int, double>>((ref) {
     orElse: () => {},
   );
 });
+
+
+// 1. Currency Notifier
+class CurrencyNotifier extends StateNotifier<String> {
+  CurrencyNotifier() : super('\$') {
+    _loadCurrency();
+  }
+
+  Future<void> _loadCurrency() async {
+    final savedCurrency = await PreferencesService().getCurrency();
+    state = savedCurrency;
+  }
+
+  Future<void> setCurrency(String newCurrency) async {
+    state = newCurrency; // Update UI immediately
+    await PreferencesService().setCurrency(newCurrency); // Save to disk
+  }
+}
+
+final currencyProvider = StateNotifierProvider<CurrencyNotifier, String>((ref) {
+  return CurrencyNotifier();
+});
+
+
+// 2. Date Format Notifier
+class DateFormatNotifier extends StateNotifier<String> {
+  DateFormatNotifier() : super('MM/dd/yyyy') {
+    _loadFormat();
+  }
+
+  Future<void> _loadFormat() async {
+    final savedFormat = await PreferencesService().getDateFormat();
+    state = savedFormat;
+  }
+
+  Future<void> setFormat(String newFormat) async {
+    state = newFormat; // Update UI
+    await PreferencesService().setDateFormat(newFormat); // Save to disk
+  }
+}
+
+final dateFormatProvider = StateNotifierProvider<DateFormatNotifier, String>((ref) {
+  return DateFormatNotifier();
+});
+

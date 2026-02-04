@@ -5,6 +5,7 @@ import 'screens/dashboard_screen.dart';
 void main() async {
   // Ensure Flutter bindings are initialized before database setup
   WidgetsFlutterBinding.ensureInitialized();
+
   // // 1. Initialize Notification Service
   // final notificationService = NotificationService();
   // await notificationService.init();

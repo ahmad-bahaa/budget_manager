@@ -4,6 +4,7 @@ import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 
 class DatabaseHelper {
+  DatabaseHelper();
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
@@ -74,6 +75,20 @@ class DatabaseHelper {
   // ---------------------------------------------------------------------------
   // CRUD: Categories
   // ---------------------------------------------------------------------------
+
+
+// 1. Expose the database path getter
+  Future<String> get dbPath async {
+    final dbPath = await getDatabasesPath();
+    return join(dbPath, 'budget_tracker.db'); // Ensure this matches your existing initDB filename
+  }
+
+// 2. method to close connection (Critical for Restore)
+  Future<void> close() async {
+    final db = await database;
+    await db.close();
+    _database = null; // Reset the singleton
+  }
 
   Future<int> createCategory(CategoryModel category) async {
     final db = await instance.database;

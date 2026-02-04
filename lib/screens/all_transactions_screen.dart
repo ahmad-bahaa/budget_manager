@@ -13,6 +13,8 @@ class AllTransactionsScreen extends ConsumerWidget {
     final transactionsAsync = ref.watch(transactionsProvider);
     final currentDate = ref.watch(selectedDateProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
+    final currency = ref.watch(currencyProvider);
+    final dateFormatPattern = ref.watch(dateFormatProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +27,7 @@ class AllTransactionsScreen extends ConsumerWidget {
               final picked = await showDatePicker(
                 context: context,
                 initialDate: currentDate,
-                firstDate: DateTime(2020),
+                firstDate: DateTime(2026),
                 lastDate: DateTime(2030),
               );
               if (picked != null) {
@@ -116,9 +118,9 @@ class AllTransactionsScreen extends ConsumerWidget {
                         : category?.name ?? 'Expense',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
-                  subtitle: Text(DateFormat('MMM d, y').format(tx.date)),
+                  subtitle: Text(DateFormat(dateFormatPattern).format(tx.date)), //Text(DateFormat('MMM d, y').format(tx.date)),
                   trailing: Text(
-                    '-\$${tx.amount.toStringAsFixed(2)}',
+                    '-$currency${tx.amount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,
