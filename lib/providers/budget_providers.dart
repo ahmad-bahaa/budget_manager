@@ -1,4 +1,5 @@
 import 'package:budget_manager/services/shared_preferences.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/category_model.dart';
@@ -180,4 +181,53 @@ class DateFormatNotifier extends StateNotifier<String> {
 final dateFormatProvider = StateNotifierProvider<DateFormatNotifier, String>((ref) {
   return DateFormatNotifier();
 });
+
+
+// 1. Theme Mode Provider
+class ThemeModeNotifier extends StateNotifier<ThemeMode> {
+  ThemeModeNotifier() : super(ThemeMode.system) {
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final mode = await PreferencesService().getThemeMode();
+    state = mode;
+  }
+
+  Future<void> setTheme(ThemeMode mode) async {
+    state = mode;
+    await PreferencesService().setThemeMode(mode);
+  }
+}
+
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+  return ThemeModeNotifier();
+});
+
+// 2. Primary Color Provider
+class ColorSeedNotifier extends StateNotifier<Color> {
+  ColorSeedNotifier() : super(const Color(0xFF4CAF50)) { // Default Green
+    _loadColor();
+  }
+
+  Future<void> _loadColor() async {
+    final colorInt = await PreferencesService().getColorSeed();
+    state = Color(colorInt);
+  }
+
+  Future<void> setColor(Color color) async {
+    state = color;
+    await PreferencesService().setColorSeed(color.value);
+  }
+}
+
+final themeColorProvider = StateNotifierProvider<ColorSeedNotifier, Color>((ref) {
+  return ColorSeedNotifier();
+});
+
+// 1. Define the Filter Types
+enum TransactionFilter { all, daily, weekly, biweekly }
+
+// 2. Create the Provider (Default to 'all' which shows the whole month)
+final transactionFilterProvider = StateProvider<TransactionFilter>((ref) => TransactionFilter.all);
 

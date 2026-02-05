@@ -4,7 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/budget_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+   SettingsScreen({super.key});
+  // Define some preset colors for the user to pick
+  final List<Color> colorOptions = [
+    Colors.green,
+    Colors.blue,
+    Colors.purple,
+    Colors.red,
+    Colors.orange,
+    Colors.teal,
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -15,6 +24,8 @@ class SettingsScreen extends ConsumerWidget {
 
     final List<String> currencies = ['\$', '€', '£', '¥', 'kr', 'Rs'];
     final List<String> dateFormats = ['MM/dd/yyyy', 'dd/MM/yyyy', 'yyyy-MM-dd'];
+    final themeMode = ref.watch(themeModeProvider);
+    final currentColor = ref.watch(themeColorProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -61,6 +72,77 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (newValue) {
                 if (newValue != null) {
                   ref.read(dateFormatProvider.notifier).setFormat(newValue);                }
+              },
+            ),
+          ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text('Appearance',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+          ),
+          // 1. Theme Mode Selector
+          ListTile(
+            leading: const Icon(Icons.brightness_6),
+            title: const Text('App Theme'),
+            subtitle: Text(themeMode.toString().split('.').last.toUpperCase()),
+            trailing: DropdownButton<ThemeMode>(
+              value: themeMode,
+              underline: Container(), // Remove underline
+              items: const [
+                DropdownMenuItem(value: ThemeMode.system, child: Text('System Default')),
+                DropdownMenuItem(value: ThemeMode.light, child: Text('Light Mode')),
+                DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark Mode')),
+              ],
+              onChanged: (newMode) {
+                if (newMode != null) {
+                  ref.read(themeModeProvider.notifier).setTheme(newMode);
+                }
+              },
+            ),
+          ),
+          // 2. Color Picker (Horizontal List)
+          ListTile(
+            leading: const Icon(Icons.color_lens),
+            title: const Text('Primary Color'),
+            subtitle: const Text('Tap to change app style'),
+          ),
+          Container(
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: colorOptions.length,
+              itemBuilder: (context, index) {
+                final color = colorOptions[index];
+                return GestureDetector(
+                  onTap: () {
+                    ref.read(themeColorProvider.notifier).setColor(color);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 12),
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: currentColor.value == color.value ? Colors.black : Colors.transparent,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        )
+                      ],
+                    ),
+                    child: currentColor.value == color.value
+                        ? const Icon(Icons.check, color: Colors.white, size: 20)
+                        : null,
+                  ),
+                );
               },
             ),
           ),

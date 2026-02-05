@@ -1,3 +1,4 @@
+import 'package:budget_manager/providers/budget_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/dashboard_screen.dart';
@@ -16,52 +17,50 @@ void main() async {
 
   runApp(
     // ProviderScope is required to store the state of all Riverpod providers
-    const ProviderScope(
-      child: BudgetApp(),
-    ),
+    const ProviderScope(child: BudgetApp()),
   );
 }
 
-class BudgetApp extends StatelessWidget {
+class BudgetApp extends ConsumerWidget {
   const BudgetApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final colorSeed = ref.watch(themeColorProvider);
     return MaterialApp(
       title: 'Personal Budget Pro',
       debugShowCheckedModeBanner: false,
-
+      // Dynamic Theme Mode (Light/Dark/System)
+      themeMode: themeMode,
       // --- Theme Configuration ---
       // Light Theme
       theme: ThemeData(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
+          seedColor: colorSeed,
           brightness: Brightness.light,
         ),
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
+        useMaterial3: true,
+        appBarTheme: AppBarTheme(
+          backgroundColor: colorSeed,
+          foregroundColor: Colors.white,
         ),
       ),
 
       // Dark Theme
       darkTheme: ThemeData(
-        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
+          seedColor: colorSeed,
           brightness: Brightness.dark,
         ),
+        useMaterial3: true,
+
         appBarTheme: AppBarTheme(
           centerTitle: true,
           backgroundColor: Colors.grey[900],
           surfaceTintColor: Colors.transparent,
         ),
       ),
-
-      // Uses the system setting for Light/Dark mode
-      themeMode: ThemeMode.system,
 
       home: const DashboardScreen(),
     );
