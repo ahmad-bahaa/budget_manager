@@ -1,4 +1,5 @@
 import 'package:budget_manager/providers/budget_providers.dart';
+import 'package:budget_manager/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'screens/dashboard_screen.dart';
@@ -62,7 +63,7 @@ class BudgetApp extends ConsumerWidget {
         ),
       ),
 
-      home: const DashboardScreen(),
+      home: const SplashScreen(),
     );
   }
 }
