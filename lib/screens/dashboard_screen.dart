@@ -1,3 +1,4 @@
+import 'package:budget_manager/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -8,28 +9,30 @@ import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
 import 'all_transactions_screen.dart';
 import 'category_detail_screen.dart';
-import '../core/app_constants.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 1. Watch Data
     final totalBudget = ref.watch(totalBudgetProvider);
     final totalSpent = ref.watch(totalSpentProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final currentDate = ref.watch(selectedDateProvider);
-
+    final currency = ref.watch(currencyProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text('${AppConstants.dashboardTitle} ${DateFormat('MMM yyyy').format(currentDate)}'),
+        title: Text('Budget ${DateFormat('MMM yyyy').format(currentDate)}'),
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month),
             onPressed: () async {
+              // Date Picker logic to change month
               final picked = await showDatePicker(
                 context: context,
                 initialDate: currentDate,
@@ -37,11 +40,16 @@ class DashboardScreen extends ConsumerWidget {
                 lastDate: DateTime(2030),
               );
               if (picked != null) {
-                ref
-                    .read(selectedDateProvider.notifier)
-                    .state = picked;
+                ref.read(selectedDateProvider.notifier).state = picked;
               }
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => SettingsScreen()),
+            ),
           ),
         ],
       ),
@@ -51,52 +59,68 @@ class DashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- 1. The Major Graph (Pie Chart) ---
               SizedBox(
                 height: 250,
                 child: _buildPieChart(totalBudget, totalSpent),
               ),
               const SizedBox(height: 20),
 
+              // --- 2. Summary Cards ---
               Row(
                 children: [
                   Expanded(
                     child: _buildSummaryCard(
-                      AppConstants.budgetLabel,
+                      'Budget',
                       totalBudget,
                       Colors.blue,
+                      currency,
+                      theme.cardColor,
+                      isDarkMode,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const AllTransactionsScreen()),
-                          );
-
-                        },
-                        child: _buildSummaryCard(
-                            AppConstants.spentLabel, totalSpent, Colors.red)),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AllTransactionsScreen(),
+                          ),
+                        );
+                      },
+                      child: _buildSummaryCard(
+                          'Spent',
+                          totalSpent,
+                          Colors.red,
+                          currency,
+                          theme.cardColor,
+                          isDarkMode
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildSummaryCard(
-                      AppConstants.leftLabel,
-                      totalBudget - totalSpent,
-                      Colors.green,
+                        'Left',
+                        totalBudget - totalSpent,
+                        Colors.green,
+                        currency,
+                        theme.cardColor,
+                        isDarkMode
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 25),
 
+              // --- 3. Category List Header ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    AppConstants.categoryBreakdownLabel,
+                    "Category Breakdown",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   TextButton.icon(
@@ -109,30 +133,35 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.add_circle_outline),
-                    label: const Text(AppConstants.addCategoryAction),
+                    label: const Text("Add Category"),
                   ),
                 ],
               ),
               const SizedBox(height: 10),
 
+              // --- 4. Category List ---
               categoriesAsync.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, stack) => Text('Error: $err'),
                 data: (categories) {
                   if (categories.isEmpty) {
-                    return const Center(child: Text(AppConstants.noCategoriesMessage));
+                    return const Center(child: Text("No categories found."));
                   }
                   return ListView.separated(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: categories.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
                       final category = categories[index];
                       final spent = spendingByCategory[category.id] ?? 0.0;
                       return _CategoryProgressItem(
                         category: category,
                         spent: spent,
+                        currency: currency,
+                        color: theme.cardColor,
+                        isDarkMode: isDarkMode,
+
                       );
                     },
                   );
@@ -143,26 +172,29 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ),
       ),
+      // FAB to Add Transaction (Stubbed for now)
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           showModalBottomSheet(
             context: context,
-            isScrollControlled: true,
+            isScrollControlled: true, // Allows sheet to expand with keyboard
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
             builder: (_) => const AddTransactionScreen(),
           );
         },
-        label: const Text(AppConstants.addExpenseAction),
+        label: const Text("Add Expense"),
         icon: const Icon(Icons.add),
       ),
     );
   }
 
+  // --- Helper Widgets ---
+
   Widget _buildPieChart(double totalBudget, double totalSpent) {
     if (totalBudget == 0) {
-      return const Center(child: Text(AppConstants.setBudgetHint));
+      return const Center(child: Text("Set a budget to see charts"));
     }
 
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
@@ -193,26 +225,29 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryCard(String title, double amount, Color color) {
+  Widget _buildSummaryCard(
+      String title,
+      double amount,
+      Color color,
+      String currency,
+      Color ThemeColor,
+      bool isDarkMode,
+      ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ThemeColor,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: isDarkMode
+            ? [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 10)]
+            : [BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 10)],
       ),
       child: Column(
         children: [
           Text(title, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
           const SizedBox(height: 4),
           Text(
-            '\$${amount.toStringAsFixed(0)}',
+            '$currency${amount.toStringAsFixed(0)}',
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.bold,
@@ -228,8 +263,17 @@ class DashboardScreen extends ConsumerWidget {
 class _CategoryProgressItem extends StatelessWidget {
   final CategoryModel category;
   final double spent;
+  final String currency;
+  final Color color;
+  final bool isDarkMode;
 
-  const _CategoryProgressItem({required this.category, required this.spent});
+  const _CategoryProgressItem({
+    required this.category,
+    required this.spent,
+    required this.currency,
+    required this.color,
+    required this.isDarkMode,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +284,7 @@ class _CategoryProgressItem extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        // Navigate to Detail Screen
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -250,8 +295,11 @@ class _CategoryProgressItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: color,
           borderRadius: BorderRadius.circular(12),
+          boxShadow: isDarkMode
+              ? [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 10)]
+              : [BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 10)],
         ),
         child: Column(
           children: [
@@ -287,10 +335,10 @@ class _CategoryProgressItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      '\$${spent.toStringAsFixed(0)} / \$${category.monthlyLimit.toStringAsFixed(0)}',
+                      '$currency${spent.toStringAsFixed(0)} / $currency${category.monthlyLimit.toStringAsFixed(0)}',
                     ),
                     Text(
-                      '\$${moneyLeft.toStringAsFixed(0)} ${AppConstants.leftLabel.toLowerCase()}',
+                      '$currency${moneyLeft.toStringAsFixed(0)} left',
                       style: TextStyle(
                         fontSize: 12,
                         color: moneyLeft < 0 ? Colors.red : Colors.green,
