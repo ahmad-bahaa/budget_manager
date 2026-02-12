@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
-import 'add_transaction_screen.dart'; // Import for Edit functionality
+import 'add_transaction_screen.dart';
+import '../core/app_constants.dart';
 
 class AllTransactionsScreen extends ConsumerWidget {
   const AllTransactionsScreen({super.key});
@@ -23,11 +24,10 @@ class AllTransactionsScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.calendar_today),
             onPressed: () async {
-              // Date Picker to change month while in this view
               final picked = await showDatePicker(
                 context: context,
                 initialDate: currentDate,
-                firstDate: DateTime(2026),
+                firstDate: DateTime(2020),
                 lastDate: DateTime(2030),
               );
               if (picked != null) {
@@ -55,8 +55,6 @@ class AllTransactionsScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final tx = transactions[index];
 
-              // Find the category for this transaction to get the icon/color
-              // We use maybeWhen/data to safely access the loaded categories
               final category = categoriesAsync.asData?.value.firstWhere(
                 (c) => c.id == tx.categoryId,
                 orElse: () => CategoryModel(
@@ -81,16 +79,16 @@ class AllTransactionsScreen extends ConsumerWidget {
                   return await showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text("Delete Transaction?"),
+                      title: const Text(AppConstants.deleteTransactionTitle),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text("Cancel"),
+                          child: const Text(AppConstants.cancelAction),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
                           child: const Text(
-                            "Delete",
+                            AppConstants.deleteAction,
                             style: TextStyle(color: Colors.red),
                           ),
                         ),
@@ -115,10 +113,10 @@ class AllTransactionsScreen extends ConsumerWidget {
                   title: Text(
                     tx.note != null && tx.note!.isNotEmpty
                         ? tx.note!
-                        : category?.name ?? 'Expense',
+                        : category?.name ?? AppConstants.expenseSubtitle,
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
-                  subtitle: Text(DateFormat(dateFormatPattern).format(tx.date)), //Text(DateFormat('MMM d, y').format(tx.date)),
+                  subtitle: Text(DateFormat(dateFormatPattern).format(tx.date)),
                   trailing: Text(
                     '-$currency${tx.amount.toStringAsFixed(2)}',
                     style: const TextStyle(
@@ -127,12 +125,10 @@ class AllTransactionsScreen extends ConsumerWidget {
                       fontSize: 15,
                     ),
                   ),
-                  // Optional: Tap to Edit (Reuse AddTransactionScreen logic if you implemented edit support there)
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      // Allows sheet to expand with keyboard
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(20),

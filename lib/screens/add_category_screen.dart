@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/category_model.dart';
 import '../providers/budget_providers.dart';
+import '../core/app_constants.dart';
 
 class AddCategoryScreen extends ConsumerStatefulWidget {
   final CategoryModel? categoryToEdit;
@@ -17,7 +18,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
   final _nameController = TextEditingController();
   final _limitController = TextEditingController();
 
-  // ... inside state class ...
   final List<IconData> _icons = [
     Icons.restaurant,
     Icons.shopping_cart,
@@ -33,7 +33,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
 
   late int _selectedIconCode;
 
-  // Predefined colors for the user to pick from
   final List<String> _colorPalette = [
     '0xFFF44336', // Red
     '0xFFE91E63', // Pink
@@ -60,7 +59,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with existing data if editing
     _nameController.text = widget.categoryToEdit?.name ?? '';
     _limitController.text =
         widget.categoryToEdit?.monthlyLimit.toString() ?? '';
@@ -81,34 +79,28 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
       final name = _nameController.text;
       final limit = double.parse(_limitController.text);
 
-      // 1. Create the model object
       final categoryData = CategoryModel(
-        // Use existing ID if editing, otherwise let SQLite handle it (null)
         id: widget.categoryToEdit?.id,
         name: name,
         monthlyLimit: limit,
         colorHex: _selectedColorHex,
-        iconCode: _selectedIconCode, // From the icon picker
+        iconCode: _selectedIconCode,
       );
 
-      // 2. Decide which Provider method to call
       if (widget.categoryToEdit != null) {
-        // EDIT MODE
         ref.read(categoriesProvider.notifier).updateCategory(categoryData);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Category updated successfully')),
+          const SnackBar(content: Text(AppConstants.categoryUpdatedMessage)),
         );
       } else {
-        // ADD MODE
         ref.read(categoriesProvider.notifier).addCategory(categoryData);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Category created successfully')),
+          const SnackBar(content: Text(AppConstants.categoryCreatedMessage)),
         );
       }
 
-      // 3. Close the screen
       Navigator.of(context).pop();
     }
   }
@@ -119,9 +111,9 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: (widget.categoryToEdit != null)
-            ? Text('Edit Category')
-            : Text('New Category'),
+        title: Text(widget.categoryToEdit != null
+            ? AppConstants.editCategoryTitle
+            : AppConstants.addCategoryTitle),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -131,30 +123,28 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Name Input
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
-                    labelText: 'Category Name',
-                    hintText: 'e.g. Groceries',
+                    labelText: AppConstants.categoryNameLabel,
+                    hintText: AppConstants.categoryNameHint,
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.label),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a name';
+                      return AppConstants.enterNameError;
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
-                // 2. Limit Input
                 TextFormField(
                   controller: _limitController,
                   decoration: InputDecoration(
-                    labelText: 'Monthly Limit',
-                    prefixText:  currency,
+                    labelText: AppConstants.monthlyLimitLabel,
+                    prefixText: currency,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.monetization_on),
                   ),
@@ -163,10 +153,10 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a limit';
+                      return AppConstants.enterLimitError;
                     }
                     if (double.tryParse(value) == null) {
-                      return 'Please enter a valid number';
+                      return AppConstants.validNumberError;
                     }
                     return null;
                   },
@@ -175,7 +165,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 _buildIconPicker(),
                 const SizedBox(height: 24),
 
-                // 3. Color Picker
                 const Text(
                   'Pick a Color',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -204,7 +193,7 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                               : null,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(),
+                              color: Colors.black.withOpacity(0.2),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -219,7 +208,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // 4. Save Button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -228,23 +216,16 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Color(int.parse(_selectedColorHex)),
                     ),
-                    child: (widget.categoryToEdit != null)
-                        ? Text(
-                            'Save Changes',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        : Text(
-                            'Create Category',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    child: Text(
+                      widget.categoryToEdit != null
+                          ? AppConstants.saveChangesAction
+                          : AppConstants.createCategoryAction,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -255,7 +236,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
     );
   }
 
-  // UI for Icon Picker
   Widget _buildIconPicker() {
     return Wrap(
       spacing: 12,

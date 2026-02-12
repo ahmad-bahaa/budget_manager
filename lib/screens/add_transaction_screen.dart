@@ -4,9 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import '../models/transaction_model.dart';
 import '../providers/budget_providers.dart';
+import '../core/app_constants.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
-  final TransactionModel? transactionToEdit; // If null, we are adding new
+  final TransactionModel? transactionToEdit; 
   const AddTransactionScreen({super.key, this.transactionToEdit});
 
   @override
@@ -21,7 +22,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   DateTime _selectedDate = DateTime.now();
   int? _selectedCategoryId;
 
-  // Cleanup controllers
   @override
   void dispose() {
     _amountController.dispose();
@@ -32,7 +32,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill data if editing
     if (widget.transactionToEdit != null) {
       final tx = widget.transactionToEdit!;
       _amountController.text = tx.amount.toString();
@@ -42,7 +41,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 
-  // --- Date Picker Logic ---
   Future<void> _presentDatePicker() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -58,7 +56,6 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 
-  // --- Submit Logic ---
   Future<void> _submitData() async {
     if (_formKey.currentState!.validate() && _selectedCategoryId != null) {
       final enteredAmount = double.parse(_amountController.text);
@@ -72,46 +69,33 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         note: enteredNote.isEmpty ? null : enteredNote,
       );
       if (widget.transactionToEdit != null) {
-        // EDIT MODE
         ref
             .read(transactionsProvider.notifier)
             .updateTransaction(newTransaction);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Transaction updated!')));
+        ).showSnackBar(const SnackBar(content: Text(AppConstants.transactionUpdatedMessage)));
       } else {
-        // ADD MODE
         ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Transaction added!')));
+        ).showSnackBar(const SnackBar(content: Text(AppConstants.transactionAddedMessage)));
       }
 
       Navigator.of(context).pop();
-
-      // // Save via Riverpod Notifier
-      // await ref
-      //     .read(transactionsProvider.notifier)
-      //     .addTransaction(newTransaction);
-      //
-      // // Close the modal
-      // Navigator.of(context).pop();
     } else if (_selectedCategoryId == null) {
-      // Show error if no category selected
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a category')));
+      ).showSnackBar(const SnackBar(content: Text(AppConstants.selectCategoryError)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch categories to populate dropdown
     final categoriesState = ref.watch(categoriesProvider);
     final currency = ref.watch(currencyProvider);
 
     return Padding(
-      // Handle keyboard covering text fields
       padding: EdgeInsets.fromLTRB(
         16,
         16,
@@ -121,30 +105,29 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       child: Form(
         key: _formKey,
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Wrap content height
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               widget.transactionToEdit != null
-                  ? 'Edit Transaction'
-                  : 'New Expense',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ? AppConstants.editTransactionTitle
+                  : AppConstants.addTransactionTitle,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
 
-            // 1. Amount Field
             TextFormField(
               controller: _amountController,
               decoration: InputDecoration(
-                labelText: 'Amount',
+                labelText: AppConstants.amountLabel,
                 prefixText: currency,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   onPressed: () {
                     _amountController.clear();
                   },
-                  icon: Icon(Icons.backspace_outlined),
+                  icon: const Icon(Icons.backspace_outlined),
                 ),
               ),
 
@@ -152,47 +135,47 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 decimal: true,
               ),
               validator: (value) {
-                if (value!.contains('+') ||
+                if (value == null || value.isEmpty) {
+                  return AppConstants.enterAmountError;
+                }
+                if (value.contains('+') ||
                     value.contains('-') ||
                     value.contains('*') ||
                     value.contains('/')) {
-                  // 1. Parse the expression
-                  Parser p = Parser();
-                  Expression exp = p.parse(value);
-
-                  // 2. Evaluate the expression
-                  ContextModel cm = ContextModel();
-                  double eval = exp.evaluate(EvaluationType.REAL, cm);
-                  _amountController.text = eval.toString();
-                  return null;
-                }
-                if (value.isEmpty) {
-                  return 'Please enter an amount';
+                  try {
+                    Parser p = Parser();
+                    Expression exp = p.parse(value);
+                    ContextModel cm = ContextModel();
+                    double eval = exp.evaluate(EvaluationType.REAL, cm);
+                    _amountController.text = eval.toString();
+                    return null;
+                  } catch (e) {
+                    return AppConstants.validNumberError;
+                  }
                 }
                 if (double.tryParse(value) == null) {
-                  return 'Please enter a valid number';
+                  return AppConstants.validNumberError;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 16),
 
-            // 2. Category Dropdown
             categoriesState.when(
               loading: () => const LinearProgressIndicator(),
-              error: (err, _) => Text('Error loading categories: $err'),
+              error: (err, _) => Text('Error: $err'),
               data: (categories) {
                 if (categories.isEmpty) {
                   return const Text(
-                    "No categories found. Please add one first.",
+                    AppConstants.noCategoriesWarning,
                   );
                 }
                 return DropdownButtonFormField<int>(
                   decoration: const InputDecoration(
-                    labelText: 'Category',
+                    labelText: AppConstants.categoryLabel,
                     border: OutlineInputBorder(),
                   ),
-                  initialValue: _selectedCategoryId,
+                  value: _selectedCategoryId,
                   items: categories.map((category) {
                     return DropdownMenuItem(
                       value: category.id,
@@ -215,36 +198,33 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 3. Date Picker Row
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Date: ${DateFormat.yMMMd().format(_selectedDate)}',
+                    '${AppConstants.dateLabel} ${DateFormat.yMMMd().format(_selectedDate)}',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 TextButton(
                   onPressed: _presentDatePicker,
                   child: const Text(
-                    'Choose Date',
+                    AppConstants.chooseDateAction,
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
             ),
 
-            // 4. Note Field (Optional)
             TextFormField(
               controller: _noteController,
               decoration: const InputDecoration(
-                labelText: 'Note (Optional)',
+                labelText: AppConstants.noteLabel,
                 icon: Icon(Icons.comment),
               ),
             ),
             const SizedBox(height: 24),
 
-            // 5. Submit Button
             ElevatedButton(
               onPressed: _submitData,
               style: ElevatedButton.styleFrom(
@@ -255,8 +235,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
               child: Text(
                 widget.transactionToEdit != null
-                    ? 'Update Transaction'
-                    : 'Add Transaction',
+                    ? AppConstants.updateTransactionAction
+                    : AppConstants.addTransactionAction,
               ),
             ),
           ],

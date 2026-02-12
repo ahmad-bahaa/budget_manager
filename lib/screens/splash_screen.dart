@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
+import 'package:page_transition/page_transition.dart';
 import 'dashboard_screen.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -8,11 +9,18 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
-      splash: Icons.monetization_on_outlined, // You can use an Icon, Image, or Lottie.asset
-      nextScreen: const DashboardScreen(), // The screen to navigate to after the splash
-      splashTransition: SplashTransition.slideTransition, // Type of transition
-      duration: 2000, // Duration in milliseconds (3 seconds)
-      backgroundColor: Colors.green,
+      splash: 'assets/icons/splash.jpg',
+      // You can use an Icon, Image, or Lottie.asset
+      nextScreen: DashboardScreen(),
+      splashTransition: SplashTransition.scaleTransition,
+      splashIconSize: 250,
+      // Size of the splash screen icon
+      duration: 2500,
+      // Duration in milliseconds (3 seconds)
+      backgroundColor: Colors.white,
+      curve: Curves.fastEaseInToSlowEaseOut,
+      centered: true,
+      pageTransitionType: PageTransitionType.leftToRightWithFade,
     );
   }
 }
