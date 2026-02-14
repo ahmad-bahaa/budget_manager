@@ -5,6 +5,7 @@ import '../models/transaction_model.dart';
 
 class DatabaseHelper {
   DatabaseHelper();
+
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
 
@@ -68,7 +69,7 @@ class DatabaseHelper {
       'name': 'Rent',
       'monthly_limit': 1200.0,
       'color_hex': '0xFF3F51B5', // Indigo
-      'icon_code':'57672',
+      'icon_code': '57672',
     });
   }
 
@@ -76,14 +77,16 @@ class DatabaseHelper {
   // CRUD: Categories
   // ---------------------------------------------------------------------------
 
-
-// 1. Expose the database path getter
+  // 1. Expose the database path getter
   Future<String> get dbPath async {
     final dbPath = await getDatabasesPath();
-    return join(dbPath, 'budget_tracker.db'); // Ensure this matches your existing initDB filename
+    return join(
+      dbPath,
+      'budget_tracker.db',
+    ); // Ensure this matches your existing initDB filename
   }
 
-// 2. method to close connection (Critical for Restore)
+  // 2. method to close connection (Critical for Restore)
   Future<void> close() async {
     final db = await database;
     await db.close();
@@ -130,14 +133,45 @@ class DatabaseHelper {
     return result.map((json) => TransactionModel.fromMap(json)).toList();
   }
 
-  /// Get transactions for a specific month
-  /// [month] should be DateTime(year, month)
-  Future<List<TransactionModel>> getTransactionsByMonth(DateTime month) async {
+  // /// Get transactions for a specific month
+  // /// [month] should be DateTime(year, month)
+  // Future<List<TransactionModel>> getTransactionsByMonth(DateTime month) async {
+  //   final db = await instance.database;
+  //
+  //   // Construct start and end dates for the query
+  //   final startOfMonth = DateTime(month.year, month.month, 1);
+  //   final endOfMonth = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+  //
+  //   final result = await db.query(
+  //     'transactions',
+  //     where: 'date BETWEEN ? AND ?',
+  //     whereArgs: [startOfMonth.toIso8601String(), endOfMonth.toIso8601String()],
+  //     orderBy: 'date DESC',
+  //   );
+  //
+  //   return result.map((json) => TransactionModel.fromMap(json)).toList();
+  // }
+
+  /// Get transactions for a specific Cycle
+  /// [Dau] should be Start day
+  Future<List<TransactionModel>> getTransactionsByCycle(
+    int day,
+    DateTime month,
+  ) async {
     final db = await instance.database;
 
     // Construct start and end dates for the query
-    final startOfMonth = DateTime(month.year, month.month, 1);
-    final endOfMonth = DateTime(month.year, month.month + 1, 0, 23, 59, 59);
+
+    final currentDay = DateTime.now().day;
+
+    final startOfMonth = day > currentDay
+        ? DateTime(month.year, month.month - 1, day)
+        : DateTime(month.year, month.month, day);
+    final endOfMonth = day > currentDay
+        ? DateTime(month.year, month.month, day - 1)
+        : DateTime(month.year, month.month +1 , day - 1 );
+
+
 
     final result = await db.query(
       'transactions',
@@ -149,15 +183,44 @@ class DatabaseHelper {
     return result.map((json) => TransactionModel.fromMap(json)).toList();
   }
 
-  /// Get transactions specific to a category
-  Future<List<TransactionModel>> getTransactionsByCategory(int categoryId) async {
+  // /// Get transactions specific to a category
+  // Future<List<TransactionModel>> getTransactionsByCategory(int categoryId) async {
+  //   final db = await instance.database;
+  //   final result = await db.query(
+  //     'transactions',
+  //     where: 'category_id = ?',
+  //     whereArgs: [categoryId],
+  //     orderBy: 'date DESC',
+  //   );
+  //   return result.map((json) => TransactionModel.fromMap(json)).toList();
+  // }
+
+  Future<List<TransactionModel>> getTransactionsByCategory(
+    int categoryId,
+    int startDay,
+    DateTime month,
+  ) async {
     final db = await instance.database;
+    // Construct start and end dates for the query
+    final currentDay = DateTime.now().day.toInt();
+    final startOfMonth = startDay > currentDay
+        ? DateTime(month.year, month.month - 1, startDay)
+        : DateTime(month.year, month.month, startDay);
+    final endOfMonth = startDay > currentDay
+        ? DateTime(month.year, month.month, startDay - 1)
+        : DateTime(month.year, month.month +1 , startDay - 1 );
+
     final result = await db.query(
       'transactions',
-      where: 'category_id = ?',
-      whereArgs: [categoryId],
+      where: 'category_id = ? AND date BETWEEN ? AND ?',
+      whereArgs: [
+        categoryId,
+        startOfMonth.toIso8601String(),
+        endOfMonth.toIso8601String(),
+      ],
       orderBy: 'date DESC',
     );
+
     return result.map((json) => TransactionModel.fromMap(json)).toList();
   }
 
@@ -175,13 +238,18 @@ class DatabaseHelper {
 
   // Inside DatabaseHelper class
 
-// Generic Update
+  // Generic Update
   Future<int> update(String table, Map<String, dynamic> data) async {
     final db = await instance.database;
-    return await db.update(table, data, where: 'id = ?', whereArgs: [data['id']]);
+    return await db.update(
+      table,
+      data,
+      where: 'id = ?',
+      whereArgs: [data['id']],
+    );
   }
 
-// Generic Delete
+  // Generic Delete
   Future<int> delete(String table, int id) async {
     final db = await instance.database;
     return await db.delete(table, where: 'id = ?', whereArgs: [id]);

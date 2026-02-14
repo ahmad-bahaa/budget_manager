@@ -7,6 +7,17 @@ class PreferencesService {
   static const String _dateFormatKey = 'date_format';
   static const String _themeModeKey = 'theme_mode';
   static const String _colorSeedKey = 'color_seed';
+  static const String _cycleStartDayKey = 'cycle_start_day';
+
+  Future<void> setCycleStartDay(int day) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_cycleStartDayKey, day);
+  }
+
+  Future<int> getCycleStartDay() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_cycleStartDayKey) ?? 1; // Default to 1st
+  }
 
   // 1. THEME MODE (Saved as String: 'system', 'light', 'dark')
   Future<void> setThemeMode(ThemeMode mode) async {

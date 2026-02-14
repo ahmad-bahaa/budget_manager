@@ -1,4 +1,5 @@
 import 'package:budget_manager/screens/settings_screen.dart';
+import 'package:budget_manager/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -15,18 +16,43 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // NEW: Watch the filtered list directly
+    final currentTransactions = ref.watch(currentCycleTransactionsProvider);
+    // 2. Recalculate Totals based on this new list
+    final totalSpent = currentTransactions.fold<double>(0, (sum, item) => sum + item.amount);
+
     // 1. Watch Data
     final totalBudget = ref.watch(totalBudgetProvider);
-    final totalSpent = ref.watch(totalSpentProvider);
+    // final totalSpent = ref.watch(totalSpentProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final currentDate = ref.watch(selectedDateProvider);
     final currency = ref.watch(currencyProvider);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+    final startDay = ref.watch(cycleStartDayProvider);
+    final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
+    final rangeText =
+        "${DateFormat('MMM d').format(boundaries['start']!)} - ${DateFormat('MMM d').format(boundaries['end']!)}";
     return Scaffold(
       appBar: AppBar(
-        title: Text('Budget ${DateFormat('MMM yyyy').format(currentDate)}'),
+        title: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Budget Overview', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 10,),
+              Text(
+                rangeText, // Dynamic range based on your Payday
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
         elevation: 0,
         actions: [
           IconButton(
@@ -91,24 +117,24 @@ class DashboardScreen extends ConsumerWidget {
                         );
                       },
                       child: _buildSummaryCard(
-                          'Spent',
-                          totalSpent,
-                          Colors.red,
-                          currency,
-                          theme.cardColor,
-                          isDarkMode
+                        'Spent',
+                        totalSpent,
+                        Colors.red,
+                        currency,
+                        theme.cardColor,
+                        isDarkMode,
                       ),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildSummaryCard(
-                        'Left',
-                        totalBudget - totalSpent,
-                        Colors.green,
-                        currency,
-                        theme.cardColor,
-                        isDarkMode
+                      'Left',
+                      totalBudget - totalSpent,
+                      Colors.green,
+                      currency,
+                      theme.cardColor,
+                      isDarkMode,
                     ),
                   ),
                 ],
@@ -161,7 +187,6 @@ class DashboardScreen extends ConsumerWidget {
                         currency: currency,
                         color: theme.cardColor,
                         isDarkMode: isDarkMode,
-
                       );
                     },
                   );
@@ -226,13 +251,13 @@ class DashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildSummaryCard(
-      String title,
-      double amount,
-      Color color,
-      String currency,
-      Color ThemeColor,
-      bool isDarkMode,
-      ) {
+    String title,
+    double amount,
+    Color color,
+    String currency,
+    Color ThemeColor,
+    bool isDarkMode,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -298,8 +323,18 @@ class _CategoryProgressItem extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(12),
           boxShadow: isDarkMode
-              ? [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 10)]
-              : [BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 10)],
+              ? [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 10,
+                  ),
+                ]
+              : [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 10,
+                  ),
+                ],
         ),
         child: Column(
           children: [

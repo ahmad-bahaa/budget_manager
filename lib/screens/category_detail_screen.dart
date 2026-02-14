@@ -12,10 +12,14 @@ import '../core/app_constants.dart';
 class CategoryDetailScreen extends ConsumerWidget {
   final CategoryModel category;
 
+
   const CategoryDetailScreen({super.key, required this.category});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentMonth = ref.watch(selectedDateProvider);
+    final startDay = ref.watch(cycleStartDayProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(category.name),
@@ -52,7 +56,7 @@ class CategoryDetailScreen extends ConsumerWidget {
           Expanded(
             child: FutureBuilder<List<TransactionModel>>(
               future: DatabaseHelper.instance.getTransactionsByCategory(
-                category.id!,
+                category.id!,startDay,currentMonth,
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

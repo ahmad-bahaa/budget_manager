@@ -1,3 +1,4 @@
+import 'package:budget_manager/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,15 +12,40 @@ class AllTransactionsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+
     final transactionsAsync = ref.watch(transactionsProvider);
+
+    // final transactionsAsync = ref.watch(currentCycleTransactionsProvider);
     final currentDate = ref.watch(selectedDateProvider);
+    final startDay = ref.watch(cycleStartDayProvider);
+    final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
+    final rangeText =
+        "${DateFormat('MMM d').format(boundaries['start']!)} - ${DateFormat('MMM d').format(boundaries['end']!)}";
+
     final categoriesAsync = ref.watch(categoriesProvider);
     final currency = ref.watch(currencyProvider);
     final dateFormatPattern = ref.watch(dateFormatProvider);
 
+
+    //TODO Fix this
+
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('History: ${DateFormat('MMMM').format(currentDate)}'),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('All Transactions', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 10,),
+            Text(
+              rangeText, // Dynamic range based on your Payday
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_today),

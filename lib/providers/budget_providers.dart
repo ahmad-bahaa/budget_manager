@@ -1,4 +1,5 @@
 import 'package:budget_manager/services/shared_preferences.dart';
+import 'package:budget_manager/utils/date_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -6,8 +7,22 @@ import '../models/category_model.dart';
 import '../models/transaction_model.dart';
 import '../services/database_helper.dart';
 
+// // Example of how to filter in your main transaction provider
+// final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
+//
+// final currentCycleTransactions = allTransactions.where((tx) {
+//   return tx.date.isAfter(boundaries['start']!.subtract(const Duration(seconds: 1))) &&
+//       tx.date.isBefore(boundaries['end']!.add(const Duration(seconds: 1)));
+// }).toList();
+
 // 1. Current Date State (for filtering by month)
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());
+
+final cycleStartDayProvider = StateNotifierProvider<CycleStartDayNotifier, int>(
+  (ref) {
+    return CycleStartDayNotifier();
+  },
+);
 
 // 2. Categories Provider (AsyncNotifier pattern)
 class CategoriesNotifier
@@ -54,15 +69,32 @@ class TransactionsNotifier
   final Ref ref;
 
   TransactionsNotifier(this.ref) : super(const AsyncValue.loading()) {
-    _fetchTransactions();
+    _fetchTransactionsCycle();
   }
 
-  Future<void> _fetchTransactions() async {
+  // Future<void> _fetchTransactions() async {
+  //   state = const AsyncValue.loading();
+  //   try {
+  //     final date = ref.read(selectedDateProvider);
+  //
+  //     final transactions = await DatabaseHelper.instance.getTransactionsByMonth(
+  //       date,
+  //     );
+  //     state = AsyncValue.data(transactions);
+  //   } catch (e, stack) {
+  //     state = AsyncValue.error(e, stack);
+  //   }
+  // }
+
+  Future<void> _fetchTransactionsCycle() async {
     state = const AsyncValue.loading();
     try {
+      final startDay = ref.read(cycleStartDayProvider);
       final date = ref.read(selectedDateProvider);
-      final transactions = await DatabaseHelper.instance.getTransactionsByMonth(
-        date,
+
+      final transactions = await DatabaseHelper.instance.getTransactionsByCycle(
+        startDay,
+        date
       );
       state = AsyncValue.data(transactions);
     } catch (e, stack) {
@@ -72,23 +104,57 @@ class TransactionsNotifier
 
   Future<void> addTransaction(TransactionModel transaction) async {
     await DatabaseHelper.instance.createTransaction(transaction);
-    await _fetchTransactions(); // Refresh list to update UI
+    await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 
   // Call this when the user changes the month
-  Future<void> refresh() async => await _fetchTransactions();
+  Future<void> refresh() async => await _fetchTransactionsCycle();
 
   Future<void> updateTransaction(TransactionModel transaction) async {
     await DatabaseHelper.instance.update('transactions', transaction.toMap());
 
-     await _fetchTransactions(); // Refresh list to update UI
+    await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 
   Future<void> deleteTransaction(int id) async {
     await DatabaseHelper.instance.delete('transactions', id);
-    await _fetchTransactions(); // Refresh list to update UI
+    await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 }
+
+// 2. THE FILTERED PROVIDER (This is the logic you asked for)
+final currentCycleTransactionsProvider = Provider<List<TransactionModel>>((
+  ref,
+) {
+  // A. Watch the full list of transactions
+  final allTransactionsAsync = ref.watch(transactionsProvider);
+
+  // B. Watch the cycle start day setting
+  final startDay = ref.watch(cycleStartDayProvider);
+
+  // C. Handle the AsyncValue state safely
+  return allTransactionsAsync.when(
+    loading: () => [], // Return empty while loading
+    error: (_, __) => [], // Return empty on error
+    data: (allTransactions) {
+      if (allTransactions.isEmpty) return [];
+
+      // D. Calculate the Date Range using your Utility
+      final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
+      final startDate = boundaries['start']!;
+      final endDate = boundaries['end']!;
+
+      // E. Filter the list
+      return allTransactions.where((tx) {
+        // We use isAfter/isBefore with a slight buffer to include the exact boundary times
+        return tx.date.isAfter(
+              startDate.subtract(const Duration(seconds: 1)),
+            ) &&
+            tx.date.isBefore(endDate.add(const Duration(seconds: 1)));
+      }).toList();
+    },
+  );
+});
 
 final transactionsProvider =
     StateNotifierProvider<
@@ -96,7 +162,7 @@ final transactionsProvider =
       AsyncValue<List<TransactionModel>>
     >((ref) {
       // Watch the date provider so we re-fetch if the user changes the month
-      ref.watch(selectedDateProvider);
+      ref.watch(cycleStartDayProvider);
       return TransactionsNotifier(ref);
     });
 
@@ -138,7 +204,6 @@ final categorySpendingProvider = Provider<Map<int, double>>((ref) {
   );
 });
 
-
 // 1. Currency Notifier
 class CurrencyNotifier extends StateNotifier<String> {
   CurrencyNotifier() : super('\$') {
@@ -160,7 +225,6 @@ final currencyProvider = StateNotifierProvider<CurrencyNotifier, String>((ref) {
   return CurrencyNotifier();
 });
 
-
 // 2. Date Format Notifier
 class DateFormatNotifier extends StateNotifier<String> {
   DateFormatNotifier() : super('MM/dd/yyyy') {
@@ -178,10 +242,11 @@ class DateFormatNotifier extends StateNotifier<String> {
   }
 }
 
-final dateFormatProvider = StateNotifierProvider<DateFormatNotifier, String>((ref) {
+final dateFormatProvider = StateNotifierProvider<DateFormatNotifier, String>((
+  ref,
+) {
   return DateFormatNotifier();
 });
-
 
 // 1. Theme Mode Provider
 class ThemeModeNotifier extends StateNotifier<ThemeMode> {
@@ -200,13 +265,16 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
-final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
+final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((
+  ref,
+) {
   return ThemeModeNotifier();
 });
 
 // 2. Primary Color Provider
 class ColorSeedNotifier extends StateNotifier<Color> {
-  ColorSeedNotifier() : super(const Color(0xFF4CAF50)) { // Default Green
+  ColorSeedNotifier() : super(const Color(0xFF4CAF50)) {
+    // Default Green
     _loadColor();
   }
 
@@ -221,7 +289,9 @@ class ColorSeedNotifier extends StateNotifier<Color> {
   }
 }
 
-final themeColorProvider = StateNotifierProvider<ColorSeedNotifier, Color>((ref) {
+final themeColorProvider = StateNotifierProvider<ColorSeedNotifier, Color>((
+  ref,
+) {
   return ColorSeedNotifier();
 });
 
@@ -229,5 +299,23 @@ final themeColorProvider = StateNotifierProvider<ColorSeedNotifier, Color>((ref)
 enum TransactionFilter { all, daily, weekly, biweekly }
 
 // 2. Create the Provider (Default to 'all' which shows the whole month)
-final transactionFilterProvider = StateProvider<TransactionFilter>((ref) => TransactionFilter.all);
+final transactionFilterProvider = StateProvider<TransactionFilter>(
+  (ref) => TransactionFilter.all,
+);
 
+// Add this to your budget_providers.dart
+class CycleStartDayNotifier extends StateNotifier<int> {
+  CycleStartDayNotifier() : super(1) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    final day = await PreferencesService().getCycleStartDay();
+    state = day;
+  }
+
+  Future<void> setDay(int day) async {
+    state = day;
+    await PreferencesService().setCycleStartDay(day);
+  }
+}

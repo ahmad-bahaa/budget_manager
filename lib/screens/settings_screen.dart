@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/budget_providers.dart';
 
 class SettingsScreen extends ConsumerWidget {
-   SettingsScreen({super.key});
+  SettingsScreen({super.key});
+
   // Define some preset colors for the user to pick
   final List<Color> colorOptions = [
     Colors.green,
@@ -26,14 +27,21 @@ class SettingsScreen extends ConsumerWidget {
     final List<String> dateFormats = ['MM/dd/yyyy', 'dd/MM/yyyy', 'yyyy-MM-dd'];
     final themeMode = ref.watch(themeModeProvider);
     final currentColor = ref.watch(themeColorProvider);
+    final startDay = ref.watch(cycleStartDayProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const Text('Localization',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+          const Text(
+            'Localization',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
           const SizedBox(height: 10),
 
           // Currency Selector
@@ -56,6 +64,25 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
+          ListTile(
+            leading: const Icon(Icons.calendar_month),
+            title: const Text('Monthly  Cycle Start'),
+            subtitle: Text('Current day:  $startDay of the month'),
+            trailing: DropdownButton<int>(
+              value: startDay,
+              items: List.generate(28, (index) => index + 1).map((day) {
+                return DropdownMenuItem(value: day, child: Text('Day $day'));
+              }).toList(),
+              onChanged: (newDay) {
+                if (newDay != null) {
+                  ref.read(cycleStartDayProvider.notifier).setDay(newDay);
+                  // Refresh transactions to reflect the new period
+                  ref.invalidate(transactionsProvider);
+                }
+              },
+            ),
+          ),
+          const Divider(),
 
           // Date Format Selector
           ListTile(
@@ -71,15 +98,22 @@ class SettingsScreen extends ConsumerWidget {
               }).toList(),
               onChanged: (newValue) {
                 if (newValue != null) {
-                  ref.read(dateFormatProvider.notifier).setFormat(newValue);                }
+                  ref.read(dateFormatProvider.notifier).setFormat(newValue);
+                }
               },
             ),
           ),
           const Divider(),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text('Appearance',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+            child: Text(
+              'Appearance',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
           ),
           // 1. Theme Mode Selector
           ListTile(
@@ -90,9 +124,18 @@ class SettingsScreen extends ConsumerWidget {
               value: themeMode,
               underline: Container(), // Remove underline
               items: const [
-                DropdownMenuItem(value: ThemeMode.system, child: Text('System Default')),
-                DropdownMenuItem(value: ThemeMode.light, child: Text('Light Mode')),
-                DropdownMenuItem(value: ThemeMode.dark, child: Text('Dark Mode')),
+                DropdownMenuItem(
+                  value: ThemeMode.system,
+                  child: Text('System Default'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.light,
+                  child: Text('Light Mode'),
+                ),
+                DropdownMenuItem(
+                  value: ThemeMode.dark,
+                  child: Text('Dark Mode'),
+                ),
               ],
               onChanged: (newMode) {
                 if (newMode != null) {
@@ -127,7 +170,9 @@ class SettingsScreen extends ConsumerWidget {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: currentColor.value == color.value ? Colors.black : Colors.transparent,
+                        color: currentColor.value == color.value
+                            ? Colors.black
+                            : Colors.transparent,
                         width: 3,
                       ),
                       boxShadow: [
@@ -135,7 +180,7 @@ class SettingsScreen extends ConsumerWidget {
                           color: Colors.grey.withOpacity(0.3),
                           blurRadius: 5,
                           offset: const Offset(0, 3),
-                        )
+                        ),
                       ],
                     ),
                     child: currentColor.value == color.value
@@ -149,11 +194,17 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text('Data Management',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
+            child: Text(
+              'Data Management',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
           ),
 
-// BACKUP BUTTON
+          // BACKUP BUTTON
           ListTile(
             leading: const Icon(Icons.cloud_upload),
             title: const Text('Backup Data'),
@@ -174,12 +225,20 @@ class SettingsScreen extends ConsumerWidget {
                 builder: (ctx) => AlertDialog(
                   title: const Text('Restore Backup?'),
                   content: const Text(
-                      '⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.'),
+                    '⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.',
+                  ),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                     TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Restore', style: TextStyle(color: Colors.red))),
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text(
+                        'Restore',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
                   ],
                 ),
               );
