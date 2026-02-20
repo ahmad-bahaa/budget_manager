@@ -1,7 +1,10 @@
 import 'package:budget_manager/services/backup_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart';
 import '../providers/budget_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   SettingsScreen({super.key});
@@ -256,7 +259,71 @@ class SettingsScreen extends ConsumerWidget {
               }
             },
           ),
+          const Divider(),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'Developer Info',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Ahmad Bahaa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          // BACKUP BUTTON
+          ListTile(
+            leading: const Icon(Icons.call),
+            title: const Text('Phone Number'),
+            subtitle: const Text('+201126052979'),
+            onTap: () async {
+              _makePhoneCall();
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.attach_money),
+            title: const Text('Support Developer'),
+            subtitle: const Text('Paypal'),
+            onTap: () async {
+              _makeDonation(context);
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _makePhoneCall() async {
+    final Uri launchUri = Uri(scheme: 'tel', path: '+201126052979');
+    await launchUrl(launchUri);
+  }
+
+  Future<void> _makeDonation(BuildContext context) async {
+    // Inside your Button's onPressed:
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) => PaypalCheckoutView(
+          sandboxMode: true,
+          // Use true for testing, false for live
+          clientId: "YOUR_PAYPAL_CLIENT_ID",
+          secretKey: "YOUR_PAYPAL_SECRET",
+          transactions: const [
+            {
+              "amount": {"total": '10.00', "currency": "USD"},
+              "description": "Donation to the project development.",
+            },
+          ],
+          onSuccess: (Map params) => print("Success: $params"),
+          onError: (error) => print("Error: $error"),
+          onCancel: () => print("Cancelled"),
+        ),
       ),
     );
   }

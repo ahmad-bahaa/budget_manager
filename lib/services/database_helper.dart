@@ -168,8 +168,8 @@ class DatabaseHelper {
         ? DateTime(month.year, month.month - 1, day)
         : DateTime(month.year, month.month, day);
     final endOfMonth = day > currentDay
-        ? DateTime(month.year, month.month, day - 1)
-        : DateTime(month.year, month.month +1 , day - 1 );
+        ? DateTime(month.year, month.month, day )
+        : DateTime(month.year, month.month +1 , day  );
 
 
 
