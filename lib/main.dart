@@ -1,7 +1,9 @@
 import 'package:budget_manager/providers/budget_providers.dart';
+import 'package:budget_manager/providers/language_provider.dart';
 import 'package:budget_manager/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before database setup
@@ -28,7 +30,14 @@ class BudgetApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final colorSeed = ref.watch(themeColorProvider);
+    final currentLocale = ref.watch(localeProvider);
+
     return MaterialApp(
+
+      locale: currentLocale, // This is crucial for RTL support
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+
       title: 'Personal Budget Pro',
       debugShowCheckedModeBanner: false,
       // Dynamic Theme Mode (Light/Dark/System)

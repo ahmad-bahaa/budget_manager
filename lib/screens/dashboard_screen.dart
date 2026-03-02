@@ -11,12 +11,14 @@ import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
 import 'all_transactions_screen.dart';
 import 'category_detail_screen.dart';
+import 'package:budget_manager/l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // NEW: Watch the filtered list directly
     final currentTransactions = ref.watch(currentCycleTransactionsProvider);
     // 2. Recalculate Totals based on this new list
@@ -49,8 +51,8 @@ class DashboardScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Budget Overview', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 10),
+              Text(l10n.budgetOverview, style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 10),
               Text(
                 rangeText, // Dynamic range based on your Payday
                 style: const TextStyle(
@@ -102,20 +104,21 @@ class DashboardScreen extends ConsumerWidget {
               SizedBox(
                 height: 250,
                 child: _buildAdvancedPieChart(
+                  context,
                   totalBudget,
                   totalSpent,
                   currentTransactions,
                   categories
                 ),
               ),
-              Center(child: _buildLegend(totalBudget, totalSpent, currentTransactions, categories, currency)),
-              SizedBox(height: 20),
+              Center(child: _buildLegend(context, totalBudget, totalSpent, currentTransactions, categories, currency)),
+              const SizedBox(height: 20),
               // --- 2. Summary Cards ---
               Row(
                 children: [
                   Expanded(
                     child: _buildSummaryCard(
-                      'Budget',
+                      l10n.budgetLabel,
                       totalBudget,
                       Colors.blue,
                       currency,
@@ -135,7 +138,7 @@ class DashboardScreen extends ConsumerWidget {
                         );
                       },
                       child: _buildSummaryCard(
-                        'Spent',
+                        l10n.spentLabel,
                         totalSpent,
                         Colors.red,
                         currency,
@@ -147,7 +150,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildSummaryCard(
-                      'Left',
+                      l10n.leftLabel,
                       totalBudget - totalSpent,
                       Colors.green,
                       currency,
@@ -163,9 +166,9 @@ class DashboardScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Category Breakdown",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.categoryBreakdownLabel,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   TextButton.icon(
                     onPressed: () {
@@ -177,7 +180,7 @@ class DashboardScreen extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.add_circle_outline),
-                    label: const Text("Add Category"),
+                    label: Text(l10n.addCategoryAction),
                   ),
                 ],
               ),
@@ -189,7 +192,7 @@ class DashboardScreen extends ConsumerWidget {
                 error: (err, stack) => Text('Error: $err'),
                 data: (categories) {
                   if (categories.isEmpty) {
-                    return const Center(child: Text("No categories found."));
+                    return Center(child: Text(l10n.noCategoriesMessage));
                   }
                   return ListView.separated(
                     shrinkWrap: true,
@@ -227,7 +230,7 @@ class DashboardScreen extends ConsumerWidget {
             builder: (_) => const AddTransactionScreen(),
           );
         },
-        label: const Text("Add Expense"),
+        label: Text(l10n.addExpense),
         icon: const Icon(Icons.add),
       ),
     );
@@ -235,9 +238,10 @@ class DashboardScreen extends ConsumerWidget {
 
   // --- Helper Widgets ---
 
-  Widget _buildPieChart(double totalBudget, double totalSpent) {
+  Widget _buildPieChart(BuildContext context, double totalBudget, double totalSpent) {
+    final l10n = AppLocalizations.of(context)!;
     if (totalBudget == 0) {
-      return const Center(child: Text("Set a budget to see charts"));
+      return Center(child: Text(l10n.setBudgetHint));
     }
 
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
@@ -270,23 +274,25 @@ class DashboardScreen extends ConsumerWidget {
 
   // Update your method signature to pass in the transactions
   Widget _buildAdvancedPieChart(
+    BuildContext context,
     double totalBudget,
     double totalSpent,
     List<TransactionModel> currentTransactions,
       List<CategoryModel> categories,
 
   ) {
+    final l10n = AppLocalizations.of(context)!;
     if (totalBudget == 0) {
-      return const Center(child: Text("Set a budget to see charts"));
+      return Center(child: Text(l10n.setBudgetHint));
     }
     // 1. Calculate remaining budget
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
     // 2. Group transactions by Category ID
     Map<String, double> categoryTotals = {};
     for (var tx in currentTransactions) {
-      if (categoryTotals.containsKey(tx.categoryId)) {
+      if (categoryTotals.containsKey(tx.categoryId.toString())) {
         categoryTotals[tx.categoryId.toString()] =
-            categoryTotals[tx.categoryId]! + tx.amount ;
+            categoryTotals[tx.categoryId.toString()]! + tx.amount ;
       } else {
         categoryTotals[tx.categoryId.toString()] = tx.amount;
       }
@@ -299,7 +305,6 @@ class DashboardScreen extends ConsumerWidget {
     int colorIndex = 0;
 
     categoryTotals.forEach((categoryId, amount) {
-      int id = int.parse(categoryId);
       // Only show a slice if the amount is greater than 0
       if (amount > 0) {
         chartSections.add(
@@ -342,57 +347,28 @@ class DashboardScreen extends ConsumerWidget {
 
   // 1. The Main Legend Builder
   Widget _buildLegend(
+      BuildContext context,
       double totalBudget,
       double totalSpent,
       List<TransactionModel> currentTransactions,
       List<CategoryModel> categories,
       String currencySymbol,
       ) {
+    final l10n = AppLocalizations.of(context)!;
     if (totalBudget == 0 || currentTransactions.isEmpty) return const SizedBox();
-    //
-    // // Replicate the grouping logic so the colors match the chart perfectly
-    // Map<String, double> categoryTotals = {};
-    // for (var tx in currentTransactions) {
-    //   if (categoryTotals.containsKey(tx.categoryId)) {
-    //     categoryTotals[tx.categoryId.toString()] = categoryTotals[tx.categoryId]! + tx.amount;
-    //   } else {
-    //     categoryTotals[tx.categoryId.toString()] = tx.amount;
-    //   }
-    // }
-
-    // // MUST match the exact same palette from _buildPieChart
-    // final List<Color> sectionColors = [
-    //   Colors.blue, Colors.orange, Colors.purple, Colors.redAccent,
-    //   Colors.cyan, Colors.yellow, Colors.teal, Colors.pink
-    // ];
-    //
-    // int colorIndex = 0;
+    
     List<Widget> legendItems = [];
 
-    // categoryTotals.forEach((categoryId, amount) {
-    //   if (amount > 0) {
-    //     // Find the category name
-    //     final categoryName = categories
-    //         .where((c) => c.id == categoryId)
-    //         .map((c) => c.name)
-    //         .firstWhere((_) => true, orElse: () => 'Unknown');
-    //
-    //     final color = sectionColors[colorIndex % sectionColors.length];
-    //
-    //     legendItems.add(_buildLegendIndicator(color, categoryName, amount, currencySymbol));
-    //     colorIndex++;
-    //   }
-    // });
     if (totalSpent > 0) {
       legendItems.add(
-          _buildLegendIndicator(Colors.redAccent, 'Total Spent', totalSpent / totalBudget * 100 , currencySymbol)
+          _buildLegendIndicator(Colors.redAccent, l10n.totalSpent, totalSpent / totalBudget * 100 , currencySymbol)
       );
     }
     // Add the "Remaining" indicator if there is money left
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
     if (remaining > 0) {
       legendItems.add(
-          _buildLegendIndicator(Colors.greenAccent, 'Remaining', remaining / totalBudget * 100 , currencySymbol)
+          _buildLegendIndicator(Colors.greenAccent, l10n.remaining, remaining / totalBudget * 100 , currencySymbol)
       );
     }
 
@@ -423,7 +399,7 @@ class DashboardScreen extends ConsumerWidget {
         ),
         const SizedBox(width: 6),
         Text(
-          '$name (%${amount.toDouble()})',
+          '$name (%${amount.toStringAsFixed(0)})',
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
         ),
       ],
@@ -482,6 +458,7 @@ class _CategoryProgressItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final double progress = (category.monthlyLimit == 0)
         ? 0
         : (spent / category.monthlyLimit).clamp(0.0, 1.0);
@@ -536,7 +513,7 @@ class _CategoryProgressItem extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '${(progress * 100).toStringAsFixed(0)}% used',
+                          '${(progress * 100).toStringAsFixed(0)}% ${l10n.used}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -553,7 +530,7 @@ class _CategoryProgressItem extends StatelessWidget {
                       '$currency${spent.toStringAsFixed(0)} / $currency${category.monthlyLimit.toStringAsFixed(0)}',
                     ),
                     Text(
-                      '$currency${moneyLeft.toStringAsFixed(0)} left',
+                      '$currency${moneyLeft.toStringAsFixed(0)} ${l10n.left}',
                       style: TextStyle(
                         fontSize: 12,
                         color: moneyLeft < 0 ? Colors.red : Colors.green,

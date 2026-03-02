@@ -7,7 +7,7 @@ import '../services/database_helper.dart';
 import '../providers/budget_providers.dart';
 import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
-import '../core/app_constants.dart';
+import 'package:budget_manager/l10n/app_localizations.dart';
 
 class CategoryDetailScreen extends ConsumerWidget {
   final CategoryModel category;
@@ -19,6 +19,8 @@ class CategoryDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentMonth = ref.watch(selectedDateProvider);
     final startDay = ref.watch(cycleStartDayProvider);
+    final l10n = AppLocalizations.of(context)!;
+    final currency = ref.watch(currencyProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,18 +41,18 @@ class CategoryDetailScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () => _confirmDelete(context, ref),
+            onPressed: () => _confirmDelete(context, ref, l10n),
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildHeader(category, ref),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
+          _buildHeader(category, ref, l10n, currency),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
             child: Text(
-              AppConstants.transactionHistoryLabel,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              l10n.transactionHistoryLabel,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(
@@ -60,10 +62,10 @@ class CategoryDetailScreen extends ConsumerWidget {
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text(AppConstants.noTransactionsMessage));
+                  return Center(child: Text(l10n.noTransactionsMessage));
                 }
 
                 final transactions = snapshot.data!;
@@ -83,7 +85,7 @@ class CategoryDetailScreen extends ConsumerWidget {
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
                       confirmDismiss: (direction) async {
-                        return await _showDeleteConfirmation(context);
+                        return await _showDeleteConfirmation(context, l10n);
                       },
                       onDismissed: (direction) {
                         ref
@@ -91,15 +93,15 @@ class CategoryDetailScreen extends ConsumerWidget {
                             .deleteTransaction(tx.id!);
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text(AppConstants.transactionDeletedMessage)),
+                          SnackBar(content: Text(l10n.transactionDeletedMessage)),
                         );
                       },
                       child: ListTile(
                         leading: Icon(category.icon, color: category.color),
-                        title: Text(tx.note ?? AppConstants.expenseSubtitle),
+                        title: Text(tx.note ?? l10n.expenseSubtitle),
                         subtitle: Text(DateFormat.yMMMd().format(tx.date)),
                         trailing: Text(
-                          '-\$${tx.amount.toStringAsFixed(2)}',
+                          '-$currency${tx.amount.toStringAsFixed(2)}',
                           style: const TextStyle(
                             color: Colors.red,
                             fontWeight: FontWeight.bold,
@@ -130,7 +132,7 @@ class CategoryDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(CategoryModel category, WidgetRef ref) {
+  Widget _buildHeader(CategoryModel category, WidgetRef ref, AppLocalizations l10n, String currency) {
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final spent = spendingByCategory[category.id] ?? 0.0;
     final double remaining = category.monthlyLimit - spent;
@@ -144,7 +146,7 @@ class CategoryDetailScreen extends ConsumerWidget {
             Icon(category.icon, size: 40, color: category.color),
             const SizedBox(height: 8),
             Text(
-              "${AppConstants.budgetLabel}: \$${category.monthlyLimit.toStringAsFixed(0)} ",
+              "${l10n.budgetLabel}: $currency${category.monthlyLimit.toStringAsFixed(0)} ",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -155,7 +157,7 @@ class CategoryDetailScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  " ${AppConstants.spentPrefix} \$${spent.toStringAsFixed(0)}   ",
+                  " ${l10n.spentPrefix} $currency${spent.toStringAsFixed(0)}   ",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -163,7 +165,7 @@ class CategoryDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  " ${AppConstants.remainingLabel}  \$${remaining.toStringAsFixed(0)} ",
+                  " ${l10n.remainingLabel}  $currency${remaining.toStringAsFixed(0)} ",
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -178,18 +180,18 @@ class CategoryDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
+  void _confirmDelete(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(AppConstants.deleteCategoryTitle),
-        content: const Text(
-          AppConstants.deleteCategoryMessage,
+        title: Text(l10n.deleteCategoryTitle),
+        content: Text(
+          l10n.deleteCategoryMessage,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(AppConstants.cancelAction),
+            child: Text(l10n.cancelAction),
           ),
           ElevatedButton(
             onPressed: () {
@@ -200,30 +202,30 @@ class CategoryDetailScreen extends ConsumerWidget {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text(AppConstants.deleteAction, style: TextStyle(color: Colors.white)),
+            child: Text(l10n.deleteAction, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
-}
 
-Future<bool?> _showDeleteConfirmation(BuildContext context) {
-  return showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text(AppConstants.deleteTransactionTitle),
-      content: const Text(AppConstants.deleteTransactionMessage),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text(AppConstants.cancelAction),
-        ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text(AppConstants.deleteAction, style: TextStyle(color: Colors.red)),
-        ),
-      ],
-    ),
-  );
+  Future<bool?> _showDeleteConfirmation(BuildContext context, AppLocalizations l10n) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deleteTransactionTitle),
+        content: Text(l10n.deleteTransactionMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancelAction),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.deleteAction, style: const TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }

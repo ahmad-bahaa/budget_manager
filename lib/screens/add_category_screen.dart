@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/category_model.dart';
 import '../providers/budget_providers.dart';
-import '../core/app_constants.dart';
+import 'package:budget_manager/l10n/app_localizations.dart';
 
 class AddCategoryScreen extends ConsumerStatefulWidget {
   final CategoryModel? categoryToEdit;
@@ -70,7 +70,7 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
     super.dispose();
   }
 
-  void _submitCategory() {
+  void _submitCategory(AppLocalizations l10n) {
     if (_formKey.currentState!.validate()) {
       final name = _nameController.text;
       final limit = double.parse(_limitController.text);
@@ -87,13 +87,13 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
         ref.read(categoriesProvider.notifier).updateCategory(categoryData);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppConstants.categoryUpdatedMessage)),
+          SnackBar(content: Text(l10n.categoryUpdatedMessage)),
         );
       } else {
         ref.read(categoriesProvider.notifier).addCategory(categoryData);
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppConstants.categoryCreatedMessage)),
+          SnackBar(content: Text(l10n.categoryCreatedMessage)),
         );
       }
 
@@ -103,13 +103,14 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final currency = ref.watch(currencyProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.categoryToEdit != null
-            ? AppConstants.editCategoryTitle
-            : AppConstants.addCategoryTitle),
+            ? l10n.editCategoryTitle
+            : l10n.addCategoryTitle),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -121,15 +122,15 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: AppConstants.categoryNameLabel,
-                    hintText: AppConstants.categoryNameHint,
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.label),
+                  decoration: InputDecoration(
+                    labelText: l10n.categoryNameLabel,
+                    hintText: l10n.categoryNameHint,
+                    border: const OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.label),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppConstants.enterNameError;
+                      return l10n.enterNameError;
                     }
                     return null;
                   },
@@ -139,7 +140,7 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 TextFormField(
                   controller: _limitController,
                   decoration: InputDecoration(
-                    labelText: AppConstants.monthlyLimitLabel,
+                    labelText: l10n.monthlyLimitLabel,
                     prefixText: currency,
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.monetization_on),
@@ -149,10 +150,10 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return AppConstants.enterLimitError;
+                      return l10n.enterLimitError;
                     }
                     if (double.tryParse(value) == null) {
-                      return AppConstants.validNumberError;
+                      return l10n.validNumberError;
                     }
                     return null;
                   },
@@ -161,9 +162,10 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 _buildIconPicker(),
                 const SizedBox(height: 24),
 
-                const Text(
-                  'Pick a Color',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.pickAColor
+                  ,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
@@ -207,15 +209,15 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _submitCategory,
+                    onPressed: () => _submitCategory(l10n),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       backgroundColor: Color(int.parse(_selectedColorHex)),
                     ),
                     child: Text(
                       widget.categoryToEdit != null
-                          ? AppConstants.saveChangesAction
-                          : AppConstants.createCategoryAction,
+                          ? l10n.saveChangesAction
+                          : l10n.createCategoryAction,
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.white,

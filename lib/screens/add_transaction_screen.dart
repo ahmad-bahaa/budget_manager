@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import '../models/transaction_model.dart';
 import '../providers/budget_providers.dart';
-import '../core/app_constants.dart';
+import 'package:budget_manager/l10n/app_localizations.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
   final TransactionModel? transactionToEdit; 
@@ -56,7 +56,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     }
   }
 
-  Future<void> _submitData() async {
+  Future<void> _submitData(AppLocalizations l10n) async {
     if (_formKey.currentState!.validate() && _selectedCategoryId != null) {
       final enteredAmount = double.parse(_amountController.text);
       final enteredNote = _noteController.text;
@@ -74,24 +74,25 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             .updateTransaction(newTransaction);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text(AppConstants.transactionUpdatedMessage)));
+        ).showSnackBar(SnackBar(content: Text(l10n.transactionUpdatedMessage)));
       } else {
         ref.read(transactionsProvider.notifier).addTransaction(newTransaction);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text(AppConstants.transactionAddedMessage)));
+        ).showSnackBar(SnackBar(content: Text(l10n.transactionAddedMessage)));
       }
 
       Navigator.of(context).pop();
     } else if (_selectedCategoryId == null) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text(AppConstants.selectCategoryError)));
+      ).showSnackBar(SnackBar(content: Text(l10n.selectCategoryError)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final categoriesState = ref.watch(categoriesProvider);
     final currency = ref.watch(currencyProvider);
 
@@ -110,8 +111,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           children: [
             Text(
               widget.transactionToEdit != null
-                  ? AppConstants.editTransactionTitle
-                  : AppConstants.addTransactionTitle,
+                  ? l10n.editTransactionTitle
+                  : l10n.addTransactionTitle,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -120,7 +121,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             TextFormField(
               controller: _amountController,
               decoration: InputDecoration(
-                labelText: AppConstants.amountLabel,
+                labelText: l10n.amountLabel,
                 prefixText: currency,
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
@@ -136,7 +137,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return AppConstants.enterAmountError;
+                  return l10n.enterAmountError;
                 }
                 if (value.contains('+') ||
                     value.contains('-') ||
@@ -150,11 +151,11 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                     _amountController.text = eval.toString();
                     return null;
                   } catch (e) {
-                    return AppConstants.validNumberError;
+                    return l10n.validNumberError;
                   }
                 }
                 if (double.tryParse(value) == null) {
-                  return AppConstants.validNumberError;
+                  return l10n.validNumberError;
                 }
                 return null;
               },
@@ -166,14 +167,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               error: (err, _) => Text('Error: $err'),
               data: (categories) {
                 if (categories.isEmpty) {
-                  return const Text(
-                    AppConstants.noCategoriesWarning,
+                  return Text(
+                    l10n.noCategoriesWarning,
                   );
                 }
                 return DropdownButtonFormField<int>(
-                  decoration: const InputDecoration(
-                    labelText: AppConstants.categoryLabel,
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.categoryLabel,
+                    border: const OutlineInputBorder(),
                   ),
                   value: _selectedCategoryId,
                   items: categories.map((category) {
@@ -202,15 +203,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    '${AppConstants.dateLabel} ${DateFormat.yMMMd().format(_selectedDate)}',
+                    '${l10n.dateLabel} ${DateFormat.yMMMd().format(_selectedDate)}',
                     style: const TextStyle(fontSize: 16),
                   ),
                 ),
                 TextButton(
                   onPressed: _presentDatePicker,
-                  child: const Text(
-                    AppConstants.chooseDateAction,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.chooseDateAction,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -218,15 +219,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
             TextFormField(
               controller: _noteController,
-              decoration: const InputDecoration(
-                labelText: AppConstants.noteLabel,
-                icon: Icon(Icons.comment),
+              decoration: InputDecoration(
+                labelText: l10n.noteLabel,
+                icon: const Icon(Icons.comment),
               ),
             ),
             const SizedBox(height: 24),
 
             ElevatedButton(
-              onPressed: _submitData,
+              onPressed: () => _submitData(l10n),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -235,8 +236,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               ),
               child: Text(
                 widget.transactionToEdit != null
-                    ? AppConstants.updateTransactionAction
-                    : AppConstants.addTransactionAction,
+                    ? l10n.updateTransactionAction
+                    : l10n.addTransactionAction,
               ),
             ),
           ],

@@ -1,10 +1,10 @@
+import 'package:budget_manager/l10n/app_localizations.dart';
 import 'package:budget_manager/services/backup_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_paypal_payment/flutter_paypal_payment.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart';
 import '../providers/budget_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../providers/language_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   SettingsScreen({super.key});
@@ -21,6 +21,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     // Watch the current values
     final currentCurrency = ref.watch(currencyProvider);
 
@@ -33,13 +34,13 @@ class SettingsScreen extends ConsumerWidget {
     final startDay = ref.watch(cycleStartDayProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          const Text(
-            'Localization',
-            style: TextStyle(
+          Text(
+            l10n.localization,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.blue,
@@ -47,10 +48,27 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
 
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(l10n.selectLanguage),
+            trailing: DropdownButton<String>(
+              value: ref.watch(localeProvider).languageCode,
+              items: [
+                DropdownMenuItem(value: 'en', child: Text(l10n.english)),
+                DropdownMenuItem(value: 'ar', child: Text(l10n.arabic)),
+              ],
+              onChanged: (code) {
+                if (code != null) {
+                  ref.read(localeProvider.notifier).setLocale(Locale(code));
+                }
+              },
+            ),
+          ),
+          const Divider(),
           // Currency Selector
           ListTile(
-            title: const Text('Currency Symbol'),
-            subtitle: Text('Current: $currentCurrency'),
+            title: Text(l10n.currencySymbol),
+            subtitle: Text(l10n.currentValue(currentCurrency)),
             trailing: DropdownButton<String>(
               value: currentCurrency,
               items: currencies.map((String value) {
@@ -69,12 +87,12 @@ class SettingsScreen extends ConsumerWidget {
           const Divider(),
           ListTile(
             leading: const Icon(Icons.calendar_month),
-            title: const Text('Monthly  Cycle Start'),
-            subtitle: Text('Current day:  $startDay of the month'),
+            title: Text(l10n.monthlyCycleStart),
+            subtitle: Text(l10n.currentCycleDay(startDay)),
             trailing: DropdownButton<int>(
               value: startDay,
               items: List.generate(28, (index) => index + 1).map((day) {
-                return DropdownMenuItem(value: day, child: Text('Day $day'));
+                return DropdownMenuItem(value: day, child: Text(l10n.day(day)));
               }).toList(),
               onChanged: (newDay) {
                 if (newDay != null) {
@@ -89,8 +107,8 @@ class SettingsScreen extends ConsumerWidget {
 
           // Date Format Selector
           ListTile(
-            title: const Text('Date Format'),
-            subtitle: Text('Current: $currentDateFormat'),
+            title: Text(l10n.dateFormat),
+            subtitle: Text(l10n.currentValue(currentDateFormat)),
             trailing: DropdownButton<String>(
               value: currentDateFormat,
               items: dateFormats.map((String value) {
@@ -107,11 +125,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Appearance',
-              style: TextStyle(
+              l10n.appearance,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
@@ -121,23 +139,23 @@ class SettingsScreen extends ConsumerWidget {
           // 1. Theme Mode Selector
           ListTile(
             leading: const Icon(Icons.brightness_6),
-            title: const Text('App Theme'),
+            title: Text(l10n.appTheme),
             subtitle: Text(themeMode.toString().split('.').last.toUpperCase()),
             trailing: DropdownButton<ThemeMode>(
               value: themeMode,
               underline: Container(), // Remove underline
-              items: const [
+              items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
-                  child: Text('System Default'),
+                  child: Text(l10n.systemDefault),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
-                  child: Text('Light Mode'),
+                  child: Text(l10n.lightMode),
                 ),
                 DropdownMenuItem(
                   value: ThemeMode.dark,
-                  child: Text('Dark Mode'),
+                  child: Text(l10n.darkMode),
                 ),
               ],
               onChanged: (newMode) {
@@ -150,8 +168,8 @@ class SettingsScreen extends ConsumerWidget {
           // 2. Color Picker (Horizontal List)
           ListTile(
             leading: const Icon(Icons.color_lens),
-            title: const Text('Primary Color'),
-            subtitle: const Text('Tap to change app style'),
+            title: Text(l10n.primaryColor),
+            subtitle: Text(l10n.tapToChangeStyle),
           ),
           Container(
             height: 60,
@@ -195,11 +213,11 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Data Management',
-              style: TextStyle(
+              l10n.dataManagement,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
@@ -210,8 +228,8 @@ class SettingsScreen extends ConsumerWidget {
           // BACKUP BUTTON
           ListTile(
             leading: const Icon(Icons.cloud_upload),
-            title: const Text('Backup Data'),
-            subtitle: const Text('Save your data to a file'),
+            title: Text(l10n.backupData),
+            subtitle: Text(l10n.backupSubtitle),
             onTap: () async {
               await BackupService().createBackup(context);
             },
@@ -219,27 +237,25 @@ class SettingsScreen extends ConsumerWidget {
 
           ListTile(
             leading: const Icon(Icons.cloud_download),
-            title: const Text('Restore Data'),
-            subtitle: const Text('Import data from a backup file'),
+            title: Text(l10n.restoreData),
+            subtitle: Text(l10n.restoreSubtitle),
             onTap: () async {
               // Show confirmation dialog before restoring
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Restore Backup?'),
-                  content: const Text(
-                    '⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.',
-                  ),
+                  title: Text(l10n.restoreBackupTitle),
+                  content: Text(l10n.restoreWarning),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancel'),
+                      child: Text(l10n.cancel),
                     ),
                     TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text(
-                        'Restore',
-                        style: TextStyle(color: Colors.red),
+                      child: Text(
+                        l10n.restore,
+                        style: const TextStyle(color: Colors.red),
                       ),
                     ),
                   ],
@@ -260,11 +276,11 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           const Divider(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
-              'Developer Info',
-              style: TextStyle(
+              l10n.developerInfo,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.blue,
@@ -281,7 +297,7 @@ class SettingsScreen extends ConsumerWidget {
           // BACKUP BUTTON
           ListTile(
             leading: const Icon(Icons.call),
-            title: const Text('Phone Number'),
+            title: Text(l10n.phoneNumber),
             subtitle: const Text('+201126052979'),
             onTap: () async {
               _makePhoneCall();

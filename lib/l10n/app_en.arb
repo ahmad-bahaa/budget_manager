@@ -1,0 +1,108 @@
+{
+  "appTitle": "Budget Manager",
+  "settings": "Settings",
+  "addExpense": "Add Expense",
+  "remaining": "Remaining",
+  "selectLanguage": "Select Language",
+  "dashboardTitle": "Budget",
+  "addCategoryTitle": "New Category",
+  "pickAColor": "Pick a Color",
+  "editCategoryTitle": "Edit Category",
+  "addTransactionTitle": "New Expense",
+  "editTransactionTitle": "Edit Transaction",
+  "allTransactionsTitle": "All Transactions",
+  "categoryNameLabel": "Category Name",
+  "monthlyLimitLabel": "Monthly Limit",
+  "amountLabel": "Amount",
+  "categoryLabel": "Category",
+  "noteLabel": "Note (Optional)",
+  "dateLabel": "Date:",
+  "categoryBreakdownLabel": "Category Breakdown",
+  "transactionHistoryLabel": "Transaction History",
+  "budgetLabel": "Budget",
+  "spentLabel": "Spent",
+  "leftLabel": "Left",
+  "remainingLabel": "Remaining:",
+  "spentPrefix": "Spent:",
+  "addCategoryAction": "Add Category",
+  "createCategoryAction": "Create Category",
+  "saveChangesAction": "Save Changes",
+  "addTransactionAction": "Add Transaction",
+  "updateTransactionAction": "Update Transaction",
+  "chooseDateAction": "Choose Date",
+  "cancelAction": "CANCEL",
+  "deleteAction": "DELETE",
+  "editAction": "Edit",
+  "categoryNameHint": "e.g. Groceries",
+  "noTransactionsMessage": "No transactions.",
+  "noCategoriesMessage": "No categories found.",
+  "noCategoriesWarning": "No categories found. Please add one first.",
+  "setBudgetHint": "Set a budget to see charts",
+  "expenseSubtitle": "Expense",
+  "deleteCategoryTitle": "Delete Category?",
+  "deleteCategoryMessage": "This will delete all transactions in this category.",
+  "deleteTransactionTitle": "Delete Transaction?",
+  "deleteTransactionMessage": "This action cannot be undone.",
+  "categoryCreatedMessage": "Category created successfully",
+  "categoryUpdatedMessage": "Category updated successfully",
+  "transactionAddedMessage": "Transaction added!",
+  "transactionUpdatedMessage": "Transaction updated!",
+  "transactionDeletedMessage": "Transaction deleted",
+  "enterNameError": "Please enter a name",
+  "enterLimitError": "Please enter a limit",
+  "enterAmountError": "Please enter an amount",
+  "validNumberError": "Please enter a valid number",
+  "selectCategoryError": "Please select a category",
+  "budgetOverview": "Budget Overview",
+  "totalSpent": "Total Spent",
+  "used": "used",
+  "left": "left",
+  "localization": "Localization",
+  "english": "English",
+  "arabic": "Arabic",
+  "currencySymbol": "Currency Symbol",
+  "currentValue": "Current: {value}",
+  "@currentValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyCycleStart": "Monthly Cycle Start",
+  "currentCycleDay": "Current day: {day} of the month",
+  "@currentCycleDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "day": "Day {day}",
+  "@day": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "dateFormat": "Date Format",
+  "appearance": "Appearance",
+  "appTheme": "App Theme",
+  "systemDefault": "System Default",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "primaryColor": "Primary Color",
+  "tapToChangeStyle": "Tap to change app style",
+  "dataManagement": "Data Management",
+  "backupData": "Backup Data",
+  "backupSubtitle": "Save your data to a file",
+  "restoreData": "Restore Data",
+  "restoreSubtitle": "Import data from a backup file",
+  "restoreBackupTitle": "Restore Backup?",
+  "restoreWarning": "⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.",
+  "cancel": "Cancel",
+  "restore": "Restore",
+  "developerInfo": "Developer Info",
+  "phoneNumber": "Phone Number"
+}

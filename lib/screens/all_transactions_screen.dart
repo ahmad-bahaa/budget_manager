@@ -5,17 +5,16 @@ import 'package:intl/intl.dart';
 import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
 import 'add_transaction_screen.dart';
-import '../core/app_constants.dart';
+import 'package:budget_manager/l10n/app_localizations.dart';
 
 class AllTransactionsScreen extends ConsumerWidget {
   const AllTransactionsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
+    final l10n = AppLocalizations.of(context)!;
     final transactionsAsync = ref.watch(transactionsProvider);
 
-    // final transactionsAsync = ref.watch(currentCycleTransactionsProvider);
     final currentDate = ref.watch(selectedDateProvider);
     final startDay = ref.watch(cycleStartDayProvider);
     final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
@@ -26,17 +25,13 @@ class AllTransactionsScreen extends ConsumerWidget {
     final currency = ref.watch(currencyProvider);
     final dateFormatPattern = ref.watch(dateFormatProvider);
 
-
-    //TODO Fix this
-
-
     return Scaffold(
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('All Transactions', style: TextStyle(fontSize: 16)),
-            SizedBox(height: 10,),
+            Text(l10n.allTransactionsTitle, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 10),
             Text(
               rangeText, // Dynamic range based on your Payday
               style: const TextStyle(
@@ -68,10 +63,10 @@ class AllTransactionsScreen extends ConsumerWidget {
         error: (err, stack) => Center(child: Text('Error: $err')),
         data: (transactions) {
           if (transactions.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'No transactions found for this month.',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                l10n.noTransactionsMessage,
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
               ),
             );
           }
@@ -105,17 +100,17 @@ class AllTransactionsScreen extends ConsumerWidget {
                   return await showDialog(
                     context: context,
                     builder: (ctx) => AlertDialog(
-                      title: const Text(AppConstants.deleteTransactionTitle),
+                      title: Text(l10n.deleteTransactionTitle),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text(AppConstants.cancelAction),
+                          child: Text(l10n.cancelAction),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(ctx, true),
-                          child: const Text(
-                            AppConstants.deleteAction,
-                            style: TextStyle(color: Colors.red),
+                          child: Text(
+                            l10n.deleteAction,
+                            style: const TextStyle(color: Colors.red),
                           ),
                         ),
                       ],
@@ -139,7 +134,7 @@ class AllTransactionsScreen extends ConsumerWidget {
                   title: Text(
                     tx.note != null && tx.note!.isNotEmpty
                         ? tx.note!
-                        : category?.name ?? AppConstants.expenseSubtitle,
+                        : category?.name ?? l10n.expenseSubtitle,
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   subtitle: Text(DateFormat(dateFormatPattern).format(tx.date)),

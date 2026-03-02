@@ -1,0 +1,108 @@
+{
+  "appTitle": "مدير الميزانية",
+  "settings": "الإعدادات",
+  "addExpense": "إضافة مصروف",
+  "remaining": "المتبقي",
+  "selectLanguage": "اختر اللغة",
+  "dashboardTitle": "الميزانية",
+  "addCategoryTitle": "فئة جديدة",
+  "editCategoryTitle": "تعديل الفئة",
+  "addTransactionTitle": "مصروف جديد",
+  "editTransactionTitle": "تعديل العملية",
+  "allTransactionsTitle": "كل العمليات",
+  "categoryNameLabel": "اسم الفئة",
+  "monthlyLimitLabel": "الحد الشهري",
+  "amountLabel": "المبلغ",
+  "categoryLabel": "الفئة",
+  "noteLabel": "ملاحظة (اختياري)",
+  "dateLabel": "التاريخ:",
+  "categoryBreakdownLabel": "تفاصيل الفئات",
+  "transactionHistoryLabel": "سجل العمليات",
+  "budgetLabel": "الميزانية",
+  "spentLabel": "المصروف",
+  "leftLabel": "المتبقي",
+  "remainingLabel": "المتبقي:",
+  "spentPrefix": "المصروف:",
+  "addCategoryAction": "إضافة فئة",
+  "createCategoryAction": "إنشاء فئة",
+  "saveChangesAction": "حفظ التغييرات",
+  "addTransactionAction": "إضافة عملية",
+  "updateTransactionAction": "تحديث العملية",
+  "chooseDateAction": "اختر التاريخ",
+  "cancelAction": "إلغاء",
+  "deleteAction": "حذف",
+  "editAction": "تعديل",
+  "categoryNameHint": "مثلاً: البقالة",
+  "noTransactionsMessage": "لا توجد عمليات.",
+  "noCategoriesMessage": "لم يتم العثور على فئات.",
+  "noCategoriesWarning": "لم يتم العثور على فئات. يرجى إضافة فئة أولاً.",
+  "setBudgetHint": "حدد ميزانية لرؤية المخططات",
+  "expenseSubtitle": "مصروف",
+  "deleteCategoryTitle": "حذف الفئة؟",
+  "deleteCategoryMessage": "سيؤدي هذا إلى حذف جميع العمليات في هذه الفئة.",
+  "deleteTransactionTitle": "حذف العملية؟",
+  "deleteTransactionMessage": "هذا الإجراء لا يمكن التراجع عنه.",
+  "categoryCreatedMessage": "تم إنشاء الفئة بنجاح",
+  "pickAColor": "اختار لون الفئة",
+  "categoryUpdatedMessage": "تم تحديث الفئة بنجاح",
+  "transactionAddedMessage": "تمت إضافة العملية!",
+  "transactionUpdatedMessage": "تم تحديث العملية!",
+  "transactionDeletedMessage": "تم حذف العملية",
+  "enterNameError": "يرجى إدخال اسم",
+  "enterLimitError": "يرجى إدخال حد",
+  "enterAmountError": "يرجى إدخال مبلغ",
+  "validNumberError": "يرجى إدخال رقم صالح",
+  "selectCategoryError": "يرجى اختيار فئة",
+  "budgetOverview": "نظرة عامة على الميزانية",
+  "totalSpent": "إجمالي المصروف",
+  "used": "مستخدم",
+  "left": "متبقي",
+  "localization": "اللغة",
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "currencySymbol": "رمز العملة",
+  "currentValue": "الحالي: {value}",
+  "@currentValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "monthlyCycleStart": "بداية الدورة الشهرية",
+  "currentCycleDay": "اليوم الحالي: {day} من الشهر",
+  "@currentCycleDay": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "day": "يوم {day}",
+  "@day": {
+    "placeholders": {
+      "day": {
+        "type": "int"
+      }
+    }
+  },
+  "dateFormat": "تنسيق التاريخ",
+  "appearance": "المظهر",
+  "appTheme": "سمة التطبيق",
+  "systemDefault": "تلقائي حسب النظام",
+  "lightMode": "الوضع الفاتح",
+  "darkMode": "الوضع الداكن",
+  "primaryColor": "اللون الأساسي",
+  "tapToChangeStyle": "اضغط لتغيير نمط التطبيق",
+  "dataManagement": "إدارة البيانات",
+  "backupData": "نسخ احتياطي للبيانات",
+  "backupSubtitle": "احفظ بياناتك في ملف",
+  "restoreData": "استعادة البيانات",
+  "restoreSubtitle": "استيراد البيانات من ملف نسخ احتياطي",
+  "restoreBackupTitle": "استعادة النسخة الاحتياطية؟",
+  "restoreWarning": "⚠️ تحذير: سيؤدي هذا إلى استبدال جميع البيانات الحالية على هذا الجهاز بملف النسخ الاحتياطي. لا يمكن التراجع عن هذا الإجراء.",
+  "cancel": "إلغاء",
+  "restore": "استعادة",
+  "developerInfo": "معلومات المطور",
+  "phoneNumber": "رقم الهاتف"
+}
