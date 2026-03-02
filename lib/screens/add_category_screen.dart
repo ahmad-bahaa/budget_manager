@@ -42,10 +42,6 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
     '0xFF2196F3', // Blue
     '0xFF03A9F4', // Light Blue
     '0xFF00BCD4', // Cyan
-    '0xFF009688', // Teal
-    '0xFF4CAF50', // Green
-    '0xFF8BC34A', // Light Green
-    '0xFFFFEB3B', // Yellow
     '0xFFFFC107', // Amber
     '0xFFFF9800', // Orange
     '0xFFFF5722', // Deep Orange

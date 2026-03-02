@@ -287,14 +287,6 @@ class SettingsScreen extends ConsumerWidget {
               _makePhoneCall();
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.attach_money),
-            title: const Text('Support Developer'),
-            subtitle: const Text('Paypal'),
-            onTap: () async {
-              _makeDonation(context);
-            },
-          ),
         ],
       ),
     );
@@ -305,26 +297,5 @@ class SettingsScreen extends ConsumerWidget {
     await launchUrl(launchUri);
   }
 
-  Future<void> _makeDonation(BuildContext context) async {
-    // Inside your Button's onPressed:
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) => PaypalCheckoutView(
-          sandboxMode: true,
-          // Use true for testing, false for live
-          clientId: "YOUR_PAYPAL_CLIENT_ID",
-          secretKey: "YOUR_PAYPAL_SECRET",
-          transactions: const [
-            {
-              "amount": {"total": '10.00', "currency": "USD"},
-              "description": "Donation to the project development.",
-            },
-          ],
-          onSuccess: (Map params) => print("Success: $params"),
-          onError: (error) => print("Error: $error"),
-          onCancel: () => print("Cancelled"),
-        ),
-      ),
-    );
-  }
+
 }

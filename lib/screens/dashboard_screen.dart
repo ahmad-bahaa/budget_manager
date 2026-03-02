@@ -1,3 +1,4 @@
+import 'package:budget_manager/models/transaction_model.dart';
 import 'package:budget_manager/screens/settings_screen.dart';
 import 'package:budget_manager/utils/date_utils.dart';
 import 'package:flutter/material.dart';
@@ -19,21 +20,28 @@ class DashboardScreen extends ConsumerWidget {
     // NEW: Watch the filtered list directly
     final currentTransactions = ref.watch(currentCycleTransactionsProvider);
     // 2. Recalculate Totals based on this new list
-    final totalSpent = currentTransactions.fold<double>(0, (sum, item) => sum + item.amount);
+    final totalSpent = currentTransactions.fold<double>(
+      0,
+      (sum, item) => sum + item.amount,
+    );
 
     // 1. Watch Data
     final totalBudget = ref.watch(totalBudgetProvider);
     // final totalSpent = ref.watch(totalSpentProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
+    final categories = ref.watch(categoriesProvider).value ?? []; // GET CATEGORIES
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final currentDate = ref.watch(selectedDateProvider);
     final currency = ref.watch(currencyProvider);
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
+
     final startDay = ref.watch(cycleStartDayProvider);
     final boundaries = BudgetCycleUtils.getCycleBoundaries(startDay);
     final rangeText =
         "${DateFormat('MMM d').format(boundaries['start']!)} - ${DateFormat('MMM d').format(boundaries['end']!)}";
+
     return Scaffold(
       appBar: AppBar(
         title: Padding(
@@ -42,7 +50,7 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Budget Overview', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               Text(
                 rangeText, // Dynamic range based on your Payday
                 style: const TextStyle(
@@ -86,12 +94,22 @@ class DashboardScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- 1. The Major Graph (Pie Chart) ---
+              // SizedBox(
+              //   height: 250,
+              //   child: _buildPieChart(totalBudget, totalSpent),
+              // ),
+              // const SizedBox(height: 20),
               SizedBox(
                 height: 250,
-                child: _buildPieChart(totalBudget, totalSpent),
+                child: _buildAdvancedPieChart(
+                  totalBudget,
+                  totalSpent,
+                  currentTransactions,
+                  categories
+                ),
               ),
-              const SizedBox(height: 20),
-
+              Center(child: _buildLegend(totalBudget, totalSpent, currentTransactions, categories, currency)),
+              SizedBox(height: 20),
               // --- 2. Summary Cards ---
               Row(
                 children: [
@@ -247,6 +265,168 @@ class DashboardScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Update your method signature to pass in the transactions
+  Widget _buildAdvancedPieChart(
+    double totalBudget,
+    double totalSpent,
+    List<TransactionModel> currentTransactions,
+      List<CategoryModel> categories,
+
+  ) {
+    if (totalBudget == 0) {
+      return const Center(child: Text("Set a budget to see charts"));
+    }
+    // 1. Calculate remaining budget
+    final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
+    // 2. Group transactions by Category ID
+    Map<String, double> categoryTotals = {};
+    for (var tx in currentTransactions) {
+      if (categoryTotals.containsKey(tx.categoryId)) {
+        categoryTotals[tx.categoryId.toString()] =
+            categoryTotals[tx.categoryId]! + tx.amount ;
+      } else {
+        categoryTotals[tx.categoryId.toString()] = tx.amount;
+      }
+    }
+    // A palette of nice colors for the slices
+    final List<Color> sectionColors = categories.map((category) => category.color).toList();
+
+    // 3. Build the dynamic slices
+    List<PieChartSectionData> chartSections = [];
+    int colorIndex = 0;
+
+    categoryTotals.forEach((categoryId, amount) {
+      int id = int.parse(categoryId);
+      // Only show a slice if the amount is greater than 0
+      if (amount > 0) {
+        chartSections.add(
+          PieChartSectionData(
+            // color: categories[id].color,
+            color: sectionColors[colorIndex % sectionColors.length],
+            // Cycle through colors
+            value: amount,
+            title: '${((amount / totalBudget) * 100).toStringAsFixed(0)}%' ,
+            // Keep it blank to avoid text overlapping on small slices
+            radius: 50,
+          ),
+        );
+        colorIndex++;
+      }
+    });
+
+    // 4. Add the "Remaining Budget" slice at the end (Green)
+    if (remaining > 0) {
+      chartSections.add(
+        PieChartSectionData(
+          color: Colors.greenAccent.withOpacity(0.8),
+          value: remaining,
+          title: '${(100 - (totalSpent / totalBudget) * 100).toStringAsFixed(0)}%' ,
+          radius: 50,
+        ),
+      );
+    }
+
+    // 5. Return the rendered chart
+    return PieChart(
+      PieChartData(
+        sectionsSpace: 2,
+        // Adds a sleek small gap between the different categories
+        centerSpaceRadius: 40,
+        sections: chartSections,
+      ),
+    );
+  }
+
+  // 1. The Main Legend Builder
+  Widget _buildLegend(
+      double totalBudget,
+      double totalSpent,
+      List<TransactionModel> currentTransactions,
+      List<CategoryModel> categories,
+      String currencySymbol,
+      ) {
+    if (totalBudget == 0 || currentTransactions.isEmpty) return const SizedBox();
+    //
+    // // Replicate the grouping logic so the colors match the chart perfectly
+    // Map<String, double> categoryTotals = {};
+    // for (var tx in currentTransactions) {
+    //   if (categoryTotals.containsKey(tx.categoryId)) {
+    //     categoryTotals[tx.categoryId.toString()] = categoryTotals[tx.categoryId]! + tx.amount;
+    //   } else {
+    //     categoryTotals[tx.categoryId.toString()] = tx.amount;
+    //   }
+    // }
+
+    // // MUST match the exact same palette from _buildPieChart
+    // final List<Color> sectionColors = [
+    //   Colors.blue, Colors.orange, Colors.purple, Colors.redAccent,
+    //   Colors.cyan, Colors.yellow, Colors.teal, Colors.pink
+    // ];
+    //
+    // int colorIndex = 0;
+    List<Widget> legendItems = [];
+
+    // categoryTotals.forEach((categoryId, amount) {
+    //   if (amount > 0) {
+    //     // Find the category name
+    //     final categoryName = categories
+    //         .where((c) => c.id == categoryId)
+    //         .map((c) => c.name)
+    //         .firstWhere((_) => true, orElse: () => 'Unknown');
+    //
+    //     final color = sectionColors[colorIndex % sectionColors.length];
+    //
+    //     legendItems.add(_buildLegendIndicator(color, categoryName, amount, currencySymbol));
+    //     colorIndex++;
+    //   }
+    // });
+    if (totalSpent > 0) {
+      legendItems.add(
+          _buildLegendIndicator(Colors.redAccent, 'Total Spent', totalSpent / totalBudget * 100 , currencySymbol)
+      );
+    }
+    // Add the "Remaining" indicator if there is money left
+    final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
+    if (remaining > 0) {
+      legendItems.add(
+          _buildLegendIndicator(Colors.greenAccent, 'Remaining', remaining / totalBudget * 100 , currencySymbol)
+      );
+    }
+
+    // Wrap automatically wraps items to the next line if they run out of horizontal space
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Wrap(
+        spacing: 12, // Horizontal space between items
+        runSpacing: 8, // Vertical space between lines
+        alignment: WrapAlignment.center,
+        children: legendItems,
+      ),
+    );
+  }
+
+// 2. The Individual Indicator UI
+  Widget _buildLegendIndicator(Color color, String name, double amount, String currency) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '$name (%${amount.toDouble()})',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
+      ],
     );
   }
 
