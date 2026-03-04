@@ -55,6 +55,8 @@ class SettingsScreen extends ConsumerWidget {
               value: ref.watch(localeProvider).languageCode,
               items: [
                 DropdownMenuItem(value: 'en', child: Text(l10n.english)),
+                DropdownMenuItem(value: 'fr', child: Text(l10n.french)),
+                DropdownMenuItem(value: 'es', child: Text(l10n.spanish)),
                 DropdownMenuItem(value: 'ar', child: Text(l10n.arabic)),
               ],
               onChanged: (code) {
@@ -64,8 +66,7 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const Divider(),
-          // Currency Selector
+          const SizedBox(height: 10,),// Currency Selector
           ListTile(
             title: Text(l10n.currencySymbol),
             subtitle: Text(l10n.currentValue(currentCurrency)),
@@ -84,7 +85,7 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const Divider(),
+          const SizedBox(height: 10,),// Currency Selector
           ListTile(
             leading: const Icon(Icons.calendar_month),
             title: Text(l10n.monthlyCycleStart),
@@ -103,7 +104,7 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const Divider(),
+          const SizedBox(height: 10,),// Currency Selector
 
           // Date Format Selector
           ListTile(

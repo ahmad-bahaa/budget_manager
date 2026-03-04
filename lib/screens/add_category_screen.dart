@@ -23,6 +23,8 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
     Icons.shopping_cart,
     Icons.directions_car,
     Icons.home,
+    Icons.local_airport,
+    Icons.summarize,
     Icons.health_and_safety,
     Icons.medical_services,
     Icons.school,
