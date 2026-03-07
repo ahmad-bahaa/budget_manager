@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcaseview.dart';
 import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
 import 'add_category_screen.dart';
@@ -13,11 +15,54 @@ import 'all_transactions_screen.dart';
 import 'category_detail_screen.dart';
 import 'package:budget_manager/l10n/app_localizations.dart';
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
+  @override
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+
+// 1. Create unique keys for the 3 items we want to highlight
+  final GlobalKey _settingsKey = GlobalKey();
+  final GlobalKey _expensesKey = GlobalKey();
+  final GlobalKey _addCategoryeKey = GlobalKey();
+  final GlobalKey _budget = GlobalKey();
+
+
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // 2. Check if we should show the hints after the screen builds
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowHints();
+    });
+  }
+  Future<void> _checkAndShowHints() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenHints = prefs.getBool('has_seen_dashboard_hints') ?? false;
+
+    if (!hasSeenHints) {
+      if (!mounted) return;
+
+      // NEW v5 Syntax: Start the showcase without needing context
+      ShowcaseView.get().startShowCase([
+        _settingsKey,
+        _budget,
+        _addCategoryeKey,
+        _expensesKey,
+
+      ]);
+
+      // Save so it never shows again
+      await prefs.setBool('has_seen_dashboard_hints', true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     // NEW: Watch the filtered list directly
     final currentTransactions = ref.watch(currentCycleTransactionsProvider);
@@ -80,11 +125,16 @@ class DashboardScreen extends ConsumerWidget {
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => SettingsScreen()),
+          Showcase(
+            key: _settingsKey,
+            title: l10n.settings,
+            description: 'Tap to open settings and change your preferences such as custom monthly cycle and Currency',
+            child: IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              ),
             ),
           ),
         ],
@@ -101,14 +151,19 @@ class DashboardScreen extends ConsumerWidget {
               //   child: _buildPieChart(totalBudget, totalSpent),
               // ),
               // const SizedBox(height: 20),
-              SizedBox(
-                height: 250,
-                child: _buildAdvancedPieChart(
-                  context,
-                  totalBudget,
-                  totalSpent,
-                  currentTransactions,
-                  categories
+              Showcase(
+                key: _budget,
+                title: l10n.budgetOverview,
+                description: 'here to track total budget that been set when you add categories',
+                child: SizedBox(
+                  height: 250,
+                  child: _buildAdvancedPieChart(
+                    context,
+                    totalBudget,
+                    totalSpent,
+                    currentTransactions,
+                    categories
+                  ),
                 ),
               ),
               Center(child: _buildLegend(context, totalBudget, totalSpent, currentTransactions, categories, currency)),
@@ -128,22 +183,27 @@ class DashboardScreen extends ConsumerWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AllTransactionsScreen(),
-                          ),
-                        );
-                      },
-                      child: _buildSummaryCard(
-                        l10n.spentLabel,
-                        totalSpent,
-                        Colors.red,
-                        currency,
-                        theme.cardColor,
-                        isDarkMode,
+                    child: Showcase(
+                      key: _expensesKey,
+                      title: l10n.expenseSubtitle,
+                      description: 'Click here to see all your Expenses',
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AllTransactionsScreen(),
+                            ),
+                          );
+                        },
+                        child: _buildSummaryCard(
+                          l10n.spentLabel,
+                          totalSpent,
+                          Colors.red,
+                          currency,
+                          theme.cardColor,
+                          isDarkMode,
+                        ),
                       ),
                     ),
                   ),
@@ -166,21 +226,28 @@ class DashboardScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    l10n.categoryBreakdownLabel,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AddCategoryScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: Text(l10n.addCategoryAction),
+
+                    Text(
+                      l10n.categoryBreakdownLabel,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  Showcase(
+                    key: _addCategoryeKey,
+                    title: l10n.addCategoryTitle,
+                    description: 'Click here to add a new category',
+
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddCategoryScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: Text(l10n.addCategoryAction),
+                    ),
                   ),
                 ],
               ),
