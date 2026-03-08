@@ -12,24 +12,26 @@ import '../models/category_model.dart';
 import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
 import 'all_transactions_screen.dart';
+import 'budget_setup_screen.dart';
 import 'category_detail_screen.dart';
 import 'package:budget_manager/l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
+
   @override
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-
-// 1. Create unique keys for the 3 items we want to highlight
+  // 1. Create unique keys for the 3 items we want to highlight
   final GlobalKey _settingsKey = GlobalKey();
   final GlobalKey _expensesKey = GlobalKey();
   final GlobalKey _addCategoryeKey = GlobalKey();
   final GlobalKey _budget = GlobalKey();
 
-
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
   @override
   void initState() {
@@ -40,6 +42,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       _checkAndShowHints();
     });
   }
+
   Future<void> _checkAndShowHints() async {
     final prefs = await SharedPreferences.getInstance();
     final hasSeenHints = prefs.getBool('has_seen_dashboard_hints') ?? false;
@@ -53,7 +56,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         _budget,
         _addCategoryeKey,
         _expensesKey,
-
       ]);
 
       // Save so it never shows again
@@ -76,10 +78,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final totalBudget = ref.watch(totalBudgetProvider);
     // final totalSpent = ref.watch(totalSpentProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
-    final categories = ref.watch(categoriesProvider).value ?? []; // GET CATEGORIES
+    final categories =
+        ref.watch(categoriesProvider).value ?? []; // GET CATEGORIES
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final currentDate = ref.watch(selectedDateProvider);
     final currency = ref.watch(currencyProvider);
+    final colorSeed = ref.watch(themeColorProvider);
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
@@ -128,7 +132,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Showcase(
             key: _settingsKey,
             title: l10n.settings,
-            description: 'Tap to open settings and change your preferences such as custom monthly cycle and Currency',
+            description: l10n.settingsShowcaseDescription,
             child: IconButton(
               icon: const Icon(Icons.settings),
               onPressed: () => Navigator.push(
@@ -145,40 +149,127 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- 1. The Major Graph (Pie Chart) ---
-              // SizedBox(
-              //   height: 250,
-              //   child: _buildPieChart(totalBudget, totalSpent),
-              // ),
-              // const SizedBox(height: 20),
-              Showcase(
-                key: _budget,
-                title: l10n.budgetOverview,
-                description: 'here to track total budget that been set when you add categories',
-                child: SizedBox(
-                  height: 250,
-                  child: _buildAdvancedPieChart(
-                    context,
-                    totalBudget,
-                    totalSpent,
-                    currentTransactions,
-                    categories
+              SizedBox(
+                height: 350,
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Expenses Chart',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Showcase(
+                          key: _budget,
+                          title: l10n.budgetOverview,
+                          description: l10n.budgetShowcaseDescription,
+                          child: SizedBox(
+                            height: 250,
+                            child: _buildAdvancedPieChart(
+                              context,
+                              totalBudget,
+                              totalSpent,
+                              currentTransactions,
+                              categories,
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: _buildExpensesLegend(
+                            context,
+                            totalBudget,
+                            totalSpent,
+                            currentTransactions,
+                            categories,
+                            currency,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Page 2
+                    Column(
+                      children: [
+                        Text(
+                          'Budget Chart',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 250,
+                          child: _buildPieChart(
+                            context,
+                            totalBudget,
+                            totalSpent,
+                            currentTransactions,
+                            categories,
+                          ),
+                        ),
+                        Center(
+                          child: _buildBudgetLegend(
+                            context,
+                            totalBudget,
+                            categories,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  2,
+                  (index) => // Change '2' to your total page count
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 8,
+                    width: _currentPage == index ? 20 : 8,
+                    // Makes the active dot wider
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? colorSeed
+                          : Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
               ),
-              Center(child: _buildLegend(context, totalBudget, totalSpent, currentTransactions, categories, currency)),
               const SizedBox(height: 20),
               // --- 2. Summary Cards ---
               Row(
                 children: [
                   Expanded(
-                    child: _buildSummaryCard(
-                      l10n.budgetLabel,
-                      totalBudget,
-                      Colors.blue,
-                      currency,
-                      theme.cardColor,
-                      isDarkMode,
+                    child: GestureDetector(
+                      child: _buildSummaryCard(
+                        l10n.budgetLabel,
+                        totalBudget,
+                        Colors.blue,
+                        currency,
+                        theme.cardColor,
+                        isDarkMode,
+                      ),
+                      onTap: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (_) => const BudgetSetupScreen(),
+                        //   ),
+                        // );
+                      },
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -186,7 +277,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     child: Showcase(
                       key: _expensesKey,
                       title: l10n.expenseSubtitle,
-                      description: 'Click here to see all your Expenses',
+                      description: l10n.expensesShowcaseDescription,
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -226,15 +317,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
-                    Text(
-                      l10n.categoryBreakdownLabel,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.categoryBreakdownLabel,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
                   Showcase(
                     key: _addCategoryeKey,
                     title: l10n.addCategoryTitle,
-                    description: 'Click here to add a new category',
+                    description: l10n.addCategoryShowcaseDescription,
 
                     child: TextButton.icon(
                       onPressed: () {
@@ -245,8 +338,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.add_circle_outline),
-                      label: Text(l10n.addCategoryAction),
+                      icon:  Icon(Icons.add_circle_outline,color: colorSeed,),
+                      label: Text(
+                        l10n.addCategoryAction,
+                        style: TextStyle(color: colorSeed),
+                      ),
                     ),
                   ),
                 ],
@@ -305,67 +401,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // --- Helper Widgets ---
 
-  Widget _buildPieChart(BuildContext context, double totalBudget, double totalSpent) {
-    final l10n = AppLocalizations.of(context)!;
-    if (totalBudget == 0) {
-      return Center(child: Text(l10n.setBudgetHint));
-    }
-
-    final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
-
-    return PieChart(
-      PieChartData(
-        sectionsSpace: 0,
-        centerSpaceRadius: 40,
-        sections: [
-          PieChartSectionData(
-            color: Colors.redAccent,
-            value: totalSpent,
-            title: '${((totalSpent / totalBudget) * 100).toStringAsFixed(0)}%',
-            radius: 50,
-            titleStyle: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          PieChartSectionData(
-            color: Colors.greenAccent,
-            value: remaining,
-            title: '',
-            radius: 50,
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Update your method signature to pass in the transactions
-  Widget _buildAdvancedPieChart(
+  Widget _buildPieChart(
     BuildContext context,
     double totalBudget,
     double totalSpent,
     List<TransactionModel> currentTransactions,
-      List<CategoryModel> categories,
-
+    List<CategoryModel> categories,
   ) {
     final l10n = AppLocalizations.of(context)!;
     if (totalBudget == 0) {
       return Center(child: Text(l10n.setBudgetHint));
     }
     // 1. Calculate remaining budget
-    final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
     // 2. Group transactions by Category ID
     Map<String, double> categoryTotals = {};
-    for (var tx in currentTransactions) {
-      if (categoryTotals.containsKey(tx.categoryId.toString())) {
-        categoryTotals[tx.categoryId.toString()] =
-            categoryTotals[tx.categoryId.toString()]! + tx.amount ;
+    for (var tx in categories) {
+      if (categoryTotals.containsKey(tx.id.toString())) {
+        categoryTotals[tx.id.toString()] =
+            categoryTotals[tx.id.toString()]! + tx.monthlyLimit;
       } else {
-        categoryTotals[tx.categoryId.toString()] = tx.amount;
+        categoryTotals[tx.id.toString()] = tx.monthlyLimit;
       }
     }
     // A palette of nice colors for the slices
-    final List<Color> sectionColors = categories.map((category) => category.color).toList();
+    final List<Color> sectionColors = categories
+        .map((category) => category.color)
+        .toList();
 
     // 3. Build the dynamic slices
     List<PieChartSectionData> chartSections = [];
@@ -380,7 +441,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             color: sectionColors[colorIndex % sectionColors.length],
             // Cycle through colors
             value: amount,
-            title: '${((amount / totalBudget) * 100).toStringAsFixed(0)}%' ,
+            title: '${((amount / totalBudget) * 100).toStringAsFixed(0)}%',
+            // Keep it blank to avoid text overlapping on small slices
+            radius: 50,
+          ),
+        );
+        colorIndex++;
+      }
+    });
+    // 5. Return the rendered chart
+    return PieChart(
+      PieChartData(
+        sectionsSpace: 2,
+        // Adds a sleek small gap between the different categories
+        centerSpaceRadius: 40,
+        sections: chartSections,
+      ),
+    );
+  }
+
+  // Update your method signature to pass in the transactions
+  Widget _buildAdvancedPieChart(
+    BuildContext context,
+    double totalBudget,
+    double totalSpent,
+    List<TransactionModel> currentTransactions,
+    List<CategoryModel> categories,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    if (totalBudget == 0) {
+      return Center(child: Text(l10n.setBudgetHint));
+    }
+    // 1. Calculate remaining budget
+    final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
+    // 2. Group transactions by Category ID
+    Map<String, double> categoryTotals = {};
+    for (var tx in currentTransactions) {
+      if (categoryTotals.containsKey(tx.categoryId.toString())) {
+        categoryTotals[tx.categoryId.toString()] =
+            categoryTotals[tx.categoryId.toString()]! + tx.amount;
+      } else {
+        categoryTotals[tx.categoryId.toString()] = tx.amount;
+      }
+    }
+    // A palette of nice colors for the slices
+    final List<Color> sectionColors = categories
+        .map((category) => category.color)
+        .toList();
+
+    // 3. Build the dynamic slices
+    List<PieChartSectionData> chartSections = [];
+    int colorIndex = 0;
+
+    categoryTotals.forEach((categoryId, amount) {
+      // Only show a slice if the amount is greater than 0
+      if (amount > 0) {
+        chartSections.add(
+          PieChartSectionData(
+            // color: categories[id].color,
+            color: sectionColors[colorIndex % sectionColors.length],
+            // Cycle through colors
+            value: amount,
+            title: '${((amount / totalBudget) * 100).toStringAsFixed(0)}%',
             // Keep it blank to avoid text overlapping on small slices
             radius: 50,
           ),
@@ -395,7 +517,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         PieChartSectionData(
           color: Colors.greenAccent.withOpacity(0.8),
           value: remaining,
-          title: '${(100 - (totalSpent / totalBudget) * 100).toStringAsFixed(0)}%' ,
+          title:
+              '${(100 - (totalSpent / totalBudget) * 100).toStringAsFixed(0)}%',
           radius: 50,
         ),
       );
@@ -413,29 +536,39 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   // 1. The Main Legend Builder
-  Widget _buildLegend(
-      BuildContext context,
-      double totalBudget,
-      double totalSpent,
-      List<TransactionModel> currentTransactions,
-      List<CategoryModel> categories,
-      String currencySymbol,
-      ) {
+  Widget _buildExpensesLegend(
+    BuildContext context,
+    double totalBudget,
+    double totalSpent,
+    List<TransactionModel> currentTransactions,
+    List<CategoryModel> categories,
+    String currencySymbol,
+  ) {
     final l10n = AppLocalizations.of(context)!;
-    if (totalBudget == 0 || currentTransactions.isEmpty) return const SizedBox();
-    
+    if (totalBudget == 0) return const SizedBox();
+
     List<Widget> legendItems = [];
 
     if (totalSpent > 0) {
       legendItems.add(
-          _buildLegendIndicator(Colors.redAccent, l10n.totalSpent, totalSpent / totalBudget * 100 , currencySymbol)
+        _buildLegendIndicator(
+          Colors.redAccent,
+          l10n.totalSpent,
+          totalSpent / totalBudget * 100,
+          currencySymbol,
+        ),
       );
     }
     // Add the "Remaining" indicator if there is money left
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
     if (remaining > 0) {
       legendItems.add(
-          _buildLegendIndicator(Colors.greenAccent, l10n.remaining, remaining / totalBudget * 100 , currencySymbol)
+        _buildLegendIndicator(
+          Colors.greenAccent,
+          l10n.remaining,
+          remaining / totalBudget * 100,
+          currencySymbol,
+        ),
       );
     }
 
@@ -451,18 +584,55 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-// 2. The Individual Indicator UI
-  Widget _buildLegendIndicator(Color color, String name, double amount, String currency) {
+  Widget _buildBudgetLegend(
+    BuildContext context,
+    double totalBudget,
+    List<CategoryModel> categories,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    if (totalBudget == 0 || categories.isEmpty) return const SizedBox();
+
+    List<Widget> legendItems = [];
+
+    if (categories.isNotEmpty) {
+      for (var category in categories) {
+        legendItems.add(
+          _buildLegendIndicator(
+            category.color,
+            category.name,
+            category.monthlyLimit / totalBudget * 100,
+            '',
+          ),
+        );
+      }
+    }
+
+    // Wrap automatically wraps items to the next line if they run out of horizontal space
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Wrap(
+        spacing: 12, // Horizontal space between items
+        runSpacing: 8, // Vertical space between lines
+        alignment: WrapAlignment.center,
+        children: legendItems,
+      ),
+    );
+  }
+
+  // 2. The Individual Indicator UI
+  Widget _buildLegendIndicator(
+    Color color,
+    String name,
+    double amount,
+    String currency,
+  ) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: color,
-          ),
+          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
         ),
         const SizedBox(width: 6),
         Text(

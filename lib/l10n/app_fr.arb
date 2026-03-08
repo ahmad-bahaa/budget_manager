@@ -85,5 +85,12 @@
   "cancel": "Annuler",
   "restore": "Restaurer",
   "developerInfo": "Infos développeur",
-  "phoneNumber": "Numéro de téléphone"
+  "phoneNumber": "Numéro de téléphone",
+  "settingsShowcaseDescription": "Appuyez pour ouvrir les paramètres et modifier vos préférences telles que le cycle mensuel personnalisé et la devise",
+  "budgetShowcaseDescription": "Ici pour suivre le budget total défini lors de l'ajout de catégories",
+  "expensesShowcaseDescription": "Cliquez ici pour voir toutes vos dépenses",
+  "addCategoryShowcaseDescription": "Cliquez ici pour ajouter une nouvelle catégorie",
+  "errorLabel": "Erreur : {error}",
+  "percentFormat": "({value}%)",
+  "percentage": "{value}%"
 }

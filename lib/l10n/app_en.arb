@@ -60,6 +60,8 @@
   "localization": "Localization",
   "english": "English",
   "arabic": "Arabic",
+  "french": "French",
+  "spanish": "Spanish",
   "currencySymbol": "Currency Symbol",
   "currentValue": "Current: {value}",
   "@currentValue": {
@@ -104,5 +106,33 @@
   "cancel": "Cancel",
   "restore": "Restore",
   "developerInfo": "Developer Info",
-  "phoneNumber": "Phone Number"
+  "phoneNumber": "Phone Number",
+  "settingsShowcaseDescription": "Tap to open settings and change your preferences such as custom monthly cycle and Currency",
+  "budgetShowcaseDescription": "Here to track total budget that has been set when you add categories",
+  "expensesShowcaseDescription": "Click here to see all your Expenses",
+  "addCategoryShowcaseDescription": "Click here to add a new category",
+  "errorLabel": "Error: {error}",
+  "@errorLabel": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "percentFormat": "({value}%)",
+  "@percentFormat": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "percentage": "{value}%",
+  "@percentage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  }
 }

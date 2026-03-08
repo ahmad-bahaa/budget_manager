@@ -264,4 +264,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get phoneNumber => 'Número de teléfono';
+
+  @override
+  String get settingsShowcaseDescription => 'Toca para abrir los ajustes y cambiar tus preferencias, como el ciclo mensual personalizado y la moneda';
+
+  @override
+  String get budgetShowcaseDescription => 'Aquí para realizar un seguimiento del presupuesto total que se ha establecido al añadir categorías';
+
+  @override
+  String get expensesShowcaseDescription => 'Haz clic aquí para ver todos tus gastos';
+
+  @override
+  String get addCategoryShowcaseDescription => 'Haz clic aquí para añadir una nueva categoría';
+
+  @override
+  String errorLabel(String error) => 'Error: $error';
+
+  @override
+  String percentFormat(String value) => '($value%)';
 }

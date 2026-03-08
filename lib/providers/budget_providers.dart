@@ -319,3 +319,25 @@ class CycleStartDayNotifier extends StateNotifier<int> {
     await PreferencesService().setCycleStartDay(day);
   }
 }
+// This holds the mapped budgets: { "food_id": 500.0, "rent_id": 1200.0 }
+class CategoryBudgetsNotifier extends StateNotifier<Map<String, double>> {
+  CategoryBudgetsNotifier() : super({});
+
+  // Update a single category's budget
+  void setBudget(String categoryId, double amount) {
+    state = {
+      ...state,
+      categoryId: amount,
+    };
+    // TODO: In the future, save this to SharedPreferences or your local database here
+  }
+
+  // Calculate the total combined budget
+  double get totalBudget {
+    return state.values.fold(0.0, (sum, amount) => sum + amount);
+  }
+}
+
+final categoryBudgetsProvider = StateNotifierProvider<CategoryBudgetsNotifier, Map<String, double>>((ref) {
+  return CategoryBudgetsNotifier();
+});

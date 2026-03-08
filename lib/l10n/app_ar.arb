@@ -43,7 +43,6 @@
   "deleteTransactionTitle": "حذف العملية؟",
   "deleteTransactionMessage": "هذا الإجراء لا يمكن التراجع عنه.",
   "categoryCreatedMessage": "تم إنشاء الفئة بنجاح",
-  "pickAColor": "اختار لون الفئة",
   "categoryUpdatedMessage": "تم تحديث الفئة بنجاح",
   "transactionAddedMessage": "تمت إضافة العملية!",
   "transactionUpdatedMessage": "تم تحديث العملية!",
@@ -60,6 +59,8 @@
   "localization": "اللغة",
   "english": "الإنجليزية",
   "arabic": "العربية",
+  "french": "الفرنسية",
+  "spanish": "الإسبانية",
   "currencySymbol": "رمز العملة",
   "currentValue": "الحالي: {value}",
   "@currentValue": {
@@ -104,5 +105,12 @@
   "cancel": "إلغاء",
   "restore": "استعادة",
   "developerInfo": "معلومات المطور",
-  "phoneNumber": "رقم الهاتف"
+  "phoneNumber": "رقم الهاتف",
+  "settingsShowcaseDescription": "اضغط لفتح الإعدادات وتغيير تفضيلاتك مثل الدورة الشهرية المخصصة والعملة",
+  "budgetShowcaseDescription": "هنا لمتابعة إجمالي الميزانية التي تم تحديدها عند إضافة الفئات",
+  "expensesShowcaseDescription": "اضغط هنا لمشاهدة جميع مصروفاتك",
+  "addCategoryShowcaseDescription": "اضغط هنا لإضافة فئة جديدة",
+  "errorLabel": "خطأ: {error}",
+  "percentFormat": "({value}%)",
+  "percentage": "{value}%"
 }

@@ -9,29 +9,20 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.green.shade50,
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // THE MAGIC HAPPENS HERE
-          Lottie.asset(
-            'assets/lottie/splash.json',
-            height: 250, // Make it big and beautiful
-            repeat: true, // Keep the animation looping
-            reverse: false,
-            animate: true,
-          ),
-          const SizedBox(height: 40),
-          Text(
-            'Budget Manager',
-            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-
-        ],
-      ),
+    return AnimatedSplashScreen(
+      splash:
+            Lottie.asset(
+              'assets/lottie/splash.json',
+              repeat: true, // Keep the animation looping
+              reverse: false,
+              animate: true,
+            ),
+      splashIconSize: 400,
+      nextScreen: const DashboardScreen(),
+      splashTransition: SplashTransition.fadeTransition,
+      pageTransitionType: PageTransitionType.bottomToTop,
+      duration: 3000,
+      backgroundColor: Colors.white,
     );
   }
 }
