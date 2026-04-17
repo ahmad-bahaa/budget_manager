@@ -282,4 +282,40 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String percentFormat(String value) => '($value%)';
+
+  @override
+  String get savingsGoals => 'Objectifs d\'épargne';
+
+  @override
+  String get setFirstGoal => 'Fixez votre premier objectif d\'épargne !';
+
+  @override
+  String get createGoal => 'Créer un objectif';
+
+  @override
+  String get newGoal => 'Nouvel objectif';
+
+  @override
+  String get goalTitle => 'Titre de l\'objectif';
+
+  @override
+  String get targetAmount => 'Montant cible';
+
+  @override
+  String get saveGoal => 'Enregistrer l\'objectif';
+
+  @override
+  String get addFunds => 'Ajouter des fonds';
+
+  @override
+  String get howMuchToAdd => 'Combien souhaitez-vous ajouter ?';
+
+  @override
+  String get confirm => 'Confirmer';
+
+  @override
+  String fundsAddedMessage(String amount) => 'Génial ! Vous êtes plus proche de votre objectif de $amount !';
+
+  @override
+  String get macBookHint => 'ex: Nouveau MacBook';
 }

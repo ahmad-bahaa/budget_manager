@@ -134,5 +134,24 @@
         "type": "String"
       }
     }
-  }
+  },
+  "savingsGoals": "Savings Goals",
+  "setFirstGoal": "Set your first savings goal!",
+  "createGoal": "Create Goal",
+  "newGoal": "New Goal",
+  "goalTitle": "Goal Title",
+  "targetAmount": "Target Amount",
+  "saveGoal": "Save Goal",
+  "addFunds": "Add Funds",
+  "howMuchToAdd": "How much would you like to add?",
+  "confirm": "Confirm",
+  "fundsAddedMessage": "Awesome! You are {amount} closer to your goal!",
+  "@fundsAddedMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "macBookHint": "e.g. New MacBook"
 }

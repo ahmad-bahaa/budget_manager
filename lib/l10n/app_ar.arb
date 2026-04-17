@@ -112,5 +112,24 @@
   "addCategoryShowcaseDescription": "اضغط هنا لإضافة فئة جديدة",
   "errorLabel": "خطأ: {error}",
   "percentFormat": "({value}%)",
-  "percentage": "{value}%"
+  "percentage": "{value}%",
+  "savingsGoals": "أهداف الادخار",
+  "setFirstGoal": "حدد هدفك الأول للادخار!",
+  "createGoal": "إنشاء هدف",
+  "newGoal": "هدف جديد",
+  "goalTitle": "عنوان الهدف",
+  "targetAmount": "المبلغ المستهدف",
+  "saveGoal": "حفظ الهدف",
+  "addFunds": "إضافة أموال",
+  "howMuchToAdd": "كم تود أن تضيف؟",
+  "confirm": "تأكيد",
+  "fundsAddedMessage": "رائع! أنت الآن أقرب بـ {amount} من هدفك!",
+  "@fundsAddedMessage": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "macBookHint": "مثلاً: ماك بوك جديد"
 }

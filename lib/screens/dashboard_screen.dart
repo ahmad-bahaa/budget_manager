@@ -14,6 +14,7 @@ import 'add_transaction_screen.dart';
 import 'all_transactions_screen.dart';
 import 'budget_setup_screen.dart';
 import 'category_detail_screen.dart';
+import 'savings_goals_screen.dart';
 import 'package:budget_manager/l10n/app_localizations.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
@@ -149,6 +150,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Savings Goals Quick Access Card ---
+              _buildSavingsGoalsQuickCard(context, l10n, colorSeed, isDarkMode),
+              const SizedBox(height: 20),
               SizedBox(
                 height: 350,
                 child: PageView(
@@ -162,9 +166,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        const Text(
                           'Expenses Chart',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -199,9 +203,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     // Page 2
                     Column(
                       children: [
-                        Text(
+                        const Text(
                           'Budget Chart',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -401,6 +405,70 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // --- Helper Widgets ---
 
+  Widget _buildSavingsGoalsQuickCard(BuildContext context, AppLocalizations l10n, Color colorSeed, bool isDarkMode) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SavingsGoalsScreen()),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colorSeed, colorSeed.withValues(alpha: 0.8)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: colorSeed.withValues(alpha: 0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.auto_graph_rounded, color: Colors.white, size: 32),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.savingsGoals,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Track your dreams and save more!',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildPieChart(
     BuildContext context,
     double totalBudget,
@@ -515,7 +583,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (remaining > 0) {
       chartSections.add(
         PieChartSectionData(
-          color: Colors.greenAccent.withOpacity(0.8),
+          color: Colors.greenAccent.withValues(alpha: 0.8),
           value: remaining,
           title:
               '${(100 - (totalSpent / totalBudget) * 100).toStringAsFixed(0)}%',
@@ -657,8 +725,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         color: ThemeColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: isDarkMode
-            ? [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 10)]
-            : [BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 10)],
+            ? [BoxShadow(color: Colors.white.withValues(alpha: 0.3), blurRadius: 10)]
+            : [BoxShadow(color: Colors.grey.withValues(alpha: 0.3), blurRadius: 10)],
       ),
       child: Column(
         children: [
@@ -719,13 +787,13 @@ class _CategoryProgressItem extends StatelessWidget {
           boxShadow: isDarkMode
               ? [
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     blurRadius: 10,
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     blurRadius: 10,
                   ),
                 ],
@@ -738,7 +806,7 @@ class _CategoryProgressItem extends StatelessWidget {
                 Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: category.color.withOpacity(0.2),
+                      backgroundColor: category.color.withValues(alpha: 0.2),
                       child: Icon(category.icon, color: category.color),
                     ),
                     const SizedBox(width: 12),
