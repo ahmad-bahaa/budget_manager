@@ -153,5 +153,30 @@
       }
     }
   },
-  "macBookHint": "e.g. New MacBook"
+  "macBookHint": "e.g. New MacBook",
+  "cloudSync": "Cloud Sync",
+  "cloudSyncSubtitle": "Sync your data with Google Database",
+  "signInWithGoogle": "Sign in with Google",
+  "signOut": "Sign Out",
+  "syncNow": "Sync Now",
+  "lastSynced": "Last Synced: {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncing": "Syncing...",
+  "syncSuccess": "Sync completed successfully!",
+  "syncError": "Sync failed: {error}",
+  "@syncError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noInternet": "No internet connection",
+  "privacyDescription": "Your data is stored in A private Google Database, accessible only by this app."
 }

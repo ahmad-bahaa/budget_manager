@@ -1,12 +1,13 @@
 import 'dart:convert';
+import 'package:budget_manager/services/shared_preferences.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/savings_goal_model.dart';
 
 final savingsGoalsProvider =
     StateNotifierProvider<SavingsGoalNotifier, List<SavingsGoalModel>>((ref) {
-  return SavingsGoalNotifier();
-});
+      return SavingsGoalNotifier();
+    });
 
 class SavingsGoalNotifier extends StateNotifier<List<SavingsGoalModel>> {
   SavingsGoalNotifier() : super([]) {
@@ -30,8 +31,11 @@ class SavingsGoalNotifier extends StateNotifier<List<SavingsGoalModel>> {
 
   Future<void> _saveGoals() async {
     final prefs = await SharedPreferences.getInstance();
-    final String encoded = json.encode(state.map((goal) => goal.toMap()).toList());
+    final String encoded = json.encode(
+      state.map((goal) => goal.toMap()).toList(),
+    );
     await prefs.setString(_storageKey, encoded);
+    await PreferencesService().updateLastUpdated();
   }
 
   void addGoal(SavingsGoalModel goal) {
@@ -44,7 +48,10 @@ class SavingsGoalNotifier extends StateNotifier<List<SavingsGoalModel>> {
       for (final goal in state)
         if (goal.id == goalId)
           goal.copyWith(
-            savedAmount: (goal.savedAmount + amount).clamp(0, goal.targetAmount),
+            savedAmount: (goal.savedAmount + amount).clamp(
+              0,
+              goal.targetAmount,
+            ),
           )
         else
           goal,

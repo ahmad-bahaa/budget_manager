@@ -12,7 +12,9 @@ class BudgetSetupScreen extends ConsumerWidget {
     final categories = ref.watch(categoriesProvider).value ?? [];
     final categoryBudgets = ref.watch(categoryBudgetsProvider);
     final totalBudget = ref.read(categoryBudgetsProvider.notifier).totalBudget;
-    final currency = ref.watch(currencyProvider); // Assuming you have this from earlier
+    final currency = ref.watch(
+      currencyProvider,
+    ); // Assuming you have this from earlier
 
     return Scaffold(
       appBar: AppBar(
@@ -20,8 +22,11 @@ class BudgetSetupScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('DONE', style: TextStyle(fontWeight: FontWeight.bold)),
-          )
+            child: const Text(
+              'DONE',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
       body: Column(
@@ -42,7 +47,10 @@ class BudgetSetupScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   '$currency${totalBudget.toStringAsFixed(0)}',
-                  style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -58,36 +66,61 @@ class BudgetSetupScreen extends ConsumerWidget {
                 final currentAmount = categoryBudgets[category.id] ?? 0.0;
 
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.grey.shade200, // Or use category.color
-                    child: const Icon(Icons.category, color: Colors.black54), // Or category.icon
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
                   ),
-                  title: Text(category.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                  leading: CircleAvatar(
+                    backgroundColor:
+                        Colors.grey.shade200, // Or use category.color
+                    child: const Icon(
+                      Icons.category,
+                      color: Colors.black54,
+                    ), // Or category.icon
+                  ),
+                  title: Text(
+                    category.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
 
                   // The smooth inline text field
                   trailing: SizedBox(
                     width: 100,
                     child: TextField(
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       textAlign: TextAlign.right,
                       decoration: InputDecoration(
                         prefixText: currency,
                         hintText: '0',
-                        border: InputBorder.none, // Removes the ugly box for a cleaner look
+                        border: InputBorder
+                            .none, // Removes the ugly box for a cleaner look
                         focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                          ),
                         ),
                       ),
                       // Pre-fill if there's already a budget
-                      controller: TextEditingController(
-                        text: currentAmount > 0 ? currentAmount.toStringAsFixed(0) : '',
-                      )..selection = TextSelection.collapsed(offset: currentAmount > 0 ? currentAmount.toStringAsFixed(0).length : 0),
+                      controller:
+                          TextEditingController(
+                              text: currentAmount > 0
+                                  ? currentAmount.toStringAsFixed(0)
+                                  : '',
+                            )
+                            ..selection = TextSelection.collapsed(
+                              offset: currentAmount > 0
+                                  ? currentAmount.toStringAsFixed(0).length
+                                  : 0,
+                            ),
 
                       // Update Riverpod instantly as they type
                       onChanged: (value) {
                         final amount = double.tryParse(value) ?? 0.0;
-                        ref.read(categoryBudgetsProvider.notifier).setBudget(category.id as String, amount);
+                        ref
+                            .read(categoryBudgetsProvider.notifier)
+                            .setBudget(category.id as String, amount);
                       },
                     ),
                   ),

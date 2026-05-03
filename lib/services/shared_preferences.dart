@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +7,54 @@ class PreferencesService {
   static const String _themeModeKey = 'theme_mode';
   static const String _colorSeedKey = 'color_seed';
   static const String _cycleStartDayKey = 'cycle_start_day';
+  static const String _geminiApiKey = 'gemini_api_key';
+  static const String _lastUpdatedKey = 'last_updated';
+
+  Future<void> updateLastUpdated() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_lastUpdatedKey, DateTime.now().millisecondsSinceEpoch);
+  }
+
+  Future<DateTime> getLastUpdated() async {
+    final prefs = await SharedPreferences.getInstance();
+    final timestamp = prefs.getInt(_lastUpdatedKey) ?? 0;
+    return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  Future<Map<String, dynamic>> getAllSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      _currencyKey: prefs.getString(_currencyKey),
+      _dateFormatKey: prefs.getString(_dateFormatKey),
+      _themeModeKey: prefs.getString(_themeModeKey),
+      _colorSeedKey: prefs.getInt(_colorSeedKey),
+      _cycleStartDayKey: prefs.getInt(_cycleStartDayKey),
+    };
+  }
+
+  Future<void> restoreSettings(Map<String, dynamic> settings) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (settings[_currencyKey] != null)
+      await prefs.setString(_currencyKey, settings[_currencyKey]);
+    if (settings[_dateFormatKey] != null)
+      await prefs.setString(_dateFormatKey, settings[_dateFormatKey]);
+    if (settings[_themeModeKey] != null)
+      await prefs.setString(_themeModeKey, settings[_themeModeKey]);
+    if (settings[_colorSeedKey] != null)
+      await prefs.setInt(_colorSeedKey, settings[_colorSeedKey]);
+    if (settings[_cycleStartDayKey] != null)
+      await prefs.setInt(_cycleStartDayKey, settings[_cycleStartDayKey]);
+  }
+
+  Future<void> setGeminiApiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_geminiApiKey, key);
+  }
+
+  Future<String> getGeminiApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_geminiApiKey) ?? '';
+  }
 
   Future<void> setCycleStartDay(int day) async {
     final prefs = await SharedPreferences.getInstance();

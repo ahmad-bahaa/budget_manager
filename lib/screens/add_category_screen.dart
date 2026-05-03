@@ -88,15 +88,15 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
       if (widget.categoryToEdit != null) {
         ref.read(categoriesProvider.notifier).updateCategory(categoryData);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.categoryUpdatedMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.categoryUpdatedMessage)));
       } else {
         ref.read(categoriesProvider.notifier).addCategory(categoryData);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.categoryCreatedMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.categoryCreatedMessage)));
       }
 
       Navigator.of(context).pop();
@@ -110,9 +110,11 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.categoryToEdit != null
-            ? l10n.editCategoryTitle
-            : l10n.addCategoryTitle),
+        title: Text(
+          widget.categoryToEdit != null
+              ? l10n.editCategoryTitle
+              : l10n.addCategoryTitle,
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -165,9 +167,11 @@ class _AddCategoryScreenState extends ConsumerState<AddCategoryScreen> {
                 const SizedBox(height: 24),
 
                 Text(
-                  l10n.pickAColor
-                  ,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  l10n.pickAColor,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Wrap(

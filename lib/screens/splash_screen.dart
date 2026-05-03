@@ -10,13 +10,12 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSplashScreen(
-      splash:
-            Lottie.asset(
-              'assets/lottie/splash.json',
-              repeat: true, // Keep the animation looping
-              reverse: false,
-              animate: true,
-            ),
+      splash: Lottie.asset(
+        'assets/lottie/splash.json',
+        repeat: true, // Keep the animation looping
+        reverse: false,
+        animate: true,
+      ),
       splashIconSize: 400,
       nextScreen: const DashboardScreen(),
       splashTransition: SplashTransition.fadeTransition,

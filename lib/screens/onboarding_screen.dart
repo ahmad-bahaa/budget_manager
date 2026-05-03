@@ -40,27 +40,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: PageView(
           controller: _controller,
           onPageChanged: (index) {
-            setState(() => isLastPage = index == 2); // We have 3 pages (0, 1, 2)
+            setState(
+              () => isLastPage = index == 2,
+            ); // We have 3 pages (0, 1, 2)
           },
           children: [
             _buildPage(
               color: Colors.green.shade50,
-              lottiePath: 'assets/lottie/privacy.json', // Path to your animation
+              lottiePath:
+                  'assets/lottie/privacy.json', // Path to your animation
               title: "100% Private",
-              subtitle: "Your financial data stays securely on your device. No cloud, no tracking.",
+              subtitle:
+                  "Your financial data stays securely on your device. No cloud, no tracking.",
             ),
             _buildPage(
               color: Colors.blue.shade50,
-              lottiePath: 'assets/lottie/calendar.json', // Path to your animation
+              lottiePath:
+                  'assets/lottie/calendar.json', // Path to your animation
               title: "Custom Payday Cycles",
-              subtitle: "Set your budget to reset exactly on the day you get paid, not just the 1st of the month."
+              subtitle:
+                  "Set your budget to reset exactly on the day you get paid, not just the 1st of the month."
                   "\n You can add Multiple Expenses according to the calendar.",
             ),
             _buildPage(
               color: Colors.orange.shade50,
               lottiePath: 'assets/lottie/alert.json', // Path to your animation
               title: "Smart Alerts",
-              subtitle: "Let's take control of your money!"
+              subtitle:
+                  "Let's take control of your money!"
                   "\n Add your Categories & money limit to calculate your over all Budget",
             ),
           ],
@@ -98,16 +105,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             // NEXT / DONE BUTTON
             isLastPage
                 ? FilledButton(
-              onPressed: _completeOnboarding,
-              child: const Text('GET STARTED'),
-            )
+                    onPressed: _completeOnboarding,
+                    child: const Text('GET STARTED'),
+                  )
                 : TextButton(
-              onPressed: () => _controller.nextPage(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              ),
-              child: const Text('NEXT'),
-            ),
+                    onPressed: () => _controller.nextPage(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    ),
+                    child: const Text('NEXT'),
+                  ),
           ],
         ),
       ),
@@ -115,7 +122,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   // Helper widget to build each page cleanly
-  Widget _buildPage({required Color color, required String lottiePath, required String title, required String subtitle}) {
+  Widget _buildPage({
+    required Color color,
+    required String lottiePath,
+    required String title,
+    required String subtitle,
+  }) {
     return Container(
       color: color,
       padding: const EdgeInsets.symmetric(horizontal: 40),

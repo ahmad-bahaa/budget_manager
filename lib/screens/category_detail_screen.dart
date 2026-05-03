@@ -12,7 +12,6 @@ import 'package:budget_manager/l10n/app_localizations.dart';
 class CategoryDetailScreen extends ConsumerWidget {
   final CategoryModel category;
 
-
   const CategoryDetailScreen({super.key, required this.category});
 
   @override
@@ -58,7 +57,9 @@ class CategoryDetailScreen extends ConsumerWidget {
           Expanded(
             child: FutureBuilder<List<TransactionModel>>(
               future: DatabaseHelper.instance.getTransactionsByCategory(
-                category.id!,startDay,currentMonth,
+                category.id!,
+                startDay,
+                currentMonth,
               ),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -93,7 +94,9 @@ class CategoryDetailScreen extends ConsumerWidget {
                             .deleteTransaction(tx.id!);
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(l10n.transactionDeletedMessage)),
+                          SnackBar(
+                            content: Text(l10n.transactionDeletedMessage),
+                          ),
                         );
                       },
                       child: ListTile(
@@ -132,7 +135,12 @@ class CategoryDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(CategoryModel category, WidgetRef ref, AppLocalizations l10n, String currency) {
+  Widget _buildHeader(
+    CategoryModel category,
+    WidgetRef ref,
+    AppLocalizations l10n,
+    String currency,
+  ) {
     final spendingByCategory = ref.watch(categorySpendingProvider);
     final spent = spendingByCategory[category.id] ?? 0.0;
     final double remaining = category.monthlyLimit - spent;
@@ -180,14 +188,16 @@ class CategoryDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
+  void _confirmDelete(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l10n.deleteCategoryTitle),
-        content: Text(
-          l10n.deleteCategoryMessage,
-        ),
+        content: Text(l10n.deleteCategoryMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -202,14 +212,20 @@ class CategoryDetailScreen extends ConsumerWidget {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text(l10n.deleteAction, style: const TextStyle(color: Colors.white)),
+            child: Text(
+              l10n.deleteAction,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<bool?> _showDeleteConfirmation(BuildContext context, AppLocalizations l10n) {
+  Future<bool?> _showDeleteConfirmation(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -222,7 +238,10 @@ class CategoryDetailScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(l10n.deleteAction, style: const TextStyle(color: Colors.red)),
+            child: Text(
+              l10n.deleteAction,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

@@ -1,6 +1,10 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
+/// The translations for Spanish Castilian (`es`).
 class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
@@ -116,7 +120,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noCategoriesMessage => 'No se encontraron categorías.';
 
   @override
-  String get noCategoriesWarning => 'No se encontraron categorías. Por favor, añada una primero.';
+  String get noCategoriesWarning =>
+      'No se encontraron categorías. Por favor, añada una primero.';
 
   @override
   String get setBudgetHint => 'Establezca un presupuesto para ver los gráficos';
@@ -128,7 +133,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteCategoryTitle => '¿Eliminar categoría?';
 
   @override
-  String get deleteCategoryMessage => 'Esto eliminará todas las transacciones de esta categoría.';
+  String get deleteCategoryMessage =>
+      'Esto eliminará todas las transacciones de esta categoría.';
 
   @override
   String get deleteTransactionTitle => '¿Eliminar transacción?';
@@ -197,16 +203,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get currencySymbol => 'Símbolo de moneda';
 
   @override
-  String currentValue(String value) => 'Actual: $value';
+  String currentValue(String value) {
+    return 'Actual: $value';
+  }
 
   @override
   String get monthlyCycleStart => 'Inicio del ciclo mensual';
 
   @override
-  String currentCycleDay(int day) => 'Día actual: $day del mes';
+  String currentCycleDay(int day) {
+    return 'Día actual: $day del mes';
+  }
 
   @override
-  String day(int day) => 'Día $day';
+  String day(int day) {
+    return 'Día $day';
+  }
 
   @override
   String get dateFormat => 'Formato de fecha';
@@ -251,7 +263,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get restoreBackupTitle => '¿Restaurar copia de seguridad?';
 
   @override
-  String get restoreWarning => '⚠️ Advertencia: Esto sobrescribirá todos los datos actuales. Esta acción es irreversible.';
+  String get restoreWarning =>
+      '⚠️ Advertencia: Esto sobrescribirá todos los datos actuales. Esta acción es irreversible.';
 
   @override
   String get cancel => 'Cancelar';
@@ -266,56 +279,109 @@ class AppLocalizationsEs extends AppLocalizations {
   String get phoneNumber => 'Número de teléfono';
 
   @override
-  String get settingsShowcaseDescription => 'Toca para abrir los ajustes y cambiar tus preferencias, como el ciclo mensual personalizado y la moneda';
+  String get settingsShowcaseDescription =>
+      'Toca para abrir los ajustes y cambiar tus preferencias, como el ciclo mensual personalizado y la moneda';
 
   @override
-  String get budgetShowcaseDescription => 'Aquí para realizar un seguimiento del presupuesto total que se ha establecido al añadir categorías';
+  String get budgetShowcaseDescription =>
+      'Aquí para realizar un seguimiento del presupuesto total que se ha establecido al añadir categorías';
 
   @override
-  String get expensesShowcaseDescription => 'Haz clic aquí para ver todos tus gastos';
+  String get expensesShowcaseDescription =>
+      'Haz clic aquí para ver todos tus gastos';
 
   @override
-  String get addCategoryShowcaseDescription => 'Haz clic aquí para añadir una nueva categoría';
+  String get addCategoryShowcaseDescription =>
+      'Haz clic aquí para añadir una nueva categoría';
 
   @override
-  String errorLabel(String error) => 'Error: $error';
+  String errorLabel(String error) {
+    return 'Error: $error';
+  }
 
   @override
-  String percentFormat(String value) => '($value%)';
+  String percentFormat(String value) {
+    return '($value%)';
+  }
 
   @override
-  String get savingsGoals => 'Objetivos de Ahorro';
+  String percentage(String value) {
+    return '$value%';
+  }
 
   @override
-  String get setFirstGoal => '¡Establece tu primer objetivo de ahorro!';
+  String get savingsGoals => 'Savings Goals';
 
   @override
-  String get createGoal => 'Crear Objetivo';
+  String get setFirstGoal => 'Set your first savings goal!';
 
   @override
-  String get newGoal => 'Nuevo Objetivo';
+  String get createGoal => 'Create Goal';
 
   @override
-  String get goalTitle => 'Título del Objetivo';
+  String get newGoal => 'New Goal';
 
   @override
-  String get targetAmount => 'Cantidad Objetivo';
+  String get goalTitle => 'Goal Title';
 
   @override
-  String get saveGoal => 'Guardar Objetivo';
+  String get targetAmount => 'Target Amount';
 
   @override
-  String get addFunds => 'Añadir Fondos';
+  String get saveGoal => 'Save Goal';
 
   @override
-  String get howMuchToAdd => '¿Cuánto te gustaría añadir?';
+  String get addFunds => 'Add Funds';
 
   @override
-  String get confirm => 'Confirmar';
+  String get howMuchToAdd => 'How much would you like to add?';
 
   @override
-  String fundsAddedMessage(String amount) => '¡Genial! ¡Estás $amount más cerca de tu objetivo!';
+  String get confirm => 'Confirm';
 
   @override
-  String get macBookHint => 'ej. Nuevo MacBook';
+  String fundsAddedMessage(String amount) {
+    return 'Awesome! You are $amount closer to your goal!';
+  }
+
+  @override
+  String get macBookHint => 'e.g. New MacBook';
+
+  @override
+  String get cloudSync => 'Cloud Sync';
+
+  @override
+  String get cloudSyncSubtitle => 'Sync your data with Google Drive';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String lastSynced(String time) {
+    return 'Last Synced: $time';
+  }
+
+  @override
+  String get syncing => 'Syncing...';
+
+  @override
+  String get syncSuccess => 'Sync completed successfully!';
+
+  @override
+  String syncError(String error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String get noInternet => 'No internet connection';
+
+  @override
+  String get privacyDescription =>
+      'Your data is stored in your private Google Drive \'App Data\' folder, accessible only by this app.';
 }

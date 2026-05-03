@@ -42,15 +42,18 @@ class AppConstants {
   static const String categoryNameHint = 'e.g. Groceries';
   static const String noTransactionsMessage = 'No transactions.';
   static const String noCategoriesMessage = 'No categories found.';
-  static const String noCategoriesWarning = 'No categories found. Please add one first.';
+  static const String noCategoriesWarning =
+      'No categories found. Please add one first.';
   static const String setBudgetHint = 'Set a budget to see charts';
   static const String expenseSubtitle = 'Expense';
 
   // Dialogs & Messages
   static const String deleteCategoryTitle = 'Delete Category?';
-  static const String deleteCategoryMessage = 'This will delete all transactions in this category.';
+  static const String deleteCategoryMessage =
+      'This will delete all transactions in this category.';
   static const String deleteTransactionTitle = 'Delete Transaction?';
-  static const String deleteTransactionMessage = 'This action cannot be undone.';
+  static const String deleteTransactionMessage =
+      'This action cannot be undone.';
   static const String categoryCreatedMessage = 'Category created successfully';
   static const String categoryUpdatedMessage = 'Category updated successfully';
   static const String transactionAddedMessage = 'Transaction added!';

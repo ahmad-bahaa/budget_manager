@@ -1,15 +1,21 @@
 import 'package:budget_manager/l10n/app_localizations.dart';
+import 'package:budget_manager/screens/cloud_sync_screen.dart';
 import 'package:budget_manager/services/backup_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/budget_providers.dart';
+import '../providers/api_key_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/language_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
-  SettingsScreen({super.key});
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
 
-  // Define some preset colors for the user to pick
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final List<Color> colorOptions = [
     Colors.green,
     Colors.blue,
@@ -20,11 +26,9 @@ class SettingsScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    // Watch the current values
     final currentCurrency = ref.watch(currencyProvider);
-
     final currentDateFormat = ref.watch(dateFormatProvider);
 
     final List<String> currencies = ['\$', '€', '£', '¥', 'kr', 'Rs'];
@@ -32,6 +36,7 @@ class SettingsScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final currentColor = ref.watch(themeColorProvider);
     final startDay = ref.watch(cycleStartDayProvider);
+    final apiKey = ref.watch(apiKeyProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
@@ -66,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 10,),// Currency Selector
+          const SizedBox(height: 10),
           ListTile(
             title: Text(l10n.currencySymbol),
             subtitle: Text(l10n.currentValue(currentCurrency)),
@@ -85,7 +90,7 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          const SizedBox(height: 10,),// Currency Selector
+          const SizedBox(height: 10),
           ListTile(
             leading: const Icon(Icons.calendar_month),
             title: Text(l10n.monthlyCycleStart),
@@ -98,15 +103,13 @@ class SettingsScreen extends ConsumerWidget {
               onChanged: (newDay) {
                 if (newDay != null) {
                   ref.read(cycleStartDayProvider.notifier).setDay(newDay);
-                  // Refresh transactions to reflect the new period
                   ref.invalidate(transactionsProvider);
                 }
               },
             ),
           ),
-          const SizedBox(height: 10,),// Currency Selector
+          const SizedBox(height: 10),
 
-          // Date Format Selector
           ListTile(
             title: Text(l10n.dateFormat),
             subtitle: Text(l10n.currentValue(currentDateFormat)),
@@ -137,14 +140,13 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          // 1. Theme Mode Selector
           ListTile(
             leading: const Icon(Icons.brightness_6),
             title: Text(l10n.appTheme),
             subtitle: Text(themeMode.toString().split('.').last.toUpperCase()),
             trailing: DropdownButton<ThemeMode>(
               value: themeMode,
-              underline: Container(), // Remove underline
+              underline: Container(),
               items: [
                 DropdownMenuItem(
                   value: ThemeMode.system,
@@ -166,7 +168,6 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ),
-          // 2. Color Picker (Horizontal List)
           ListTile(
             leading: const Icon(Icons.color_lens),
             title: Text(l10n.primaryColor),
@@ -214,6 +215,28 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const Divider(),
+
+          // --- AI Settings Section ---
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'AI Integration',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.vpn_key),
+            title: const Text('Gemini API Key'),
+            subtitle: Text(apiKey.isEmpty ? 'Not Set' : '••••••••••••••••'),
+            trailing: const Icon(Icons.edit),
+            onTap: () => _showApiKeyDialog(context),
+          ),
+          const Divider(),
+
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Text(
@@ -226,7 +249,19 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
 
-          // BACKUP BUTTON
+          ListTile(
+            leading: const Icon(Icons.sync),
+            title: Text(l10n.cloudSync),
+            subtitle: Text(l10n.cloudSyncSubtitle),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CloudSyncScreen(),
+                ),
+              );
+            },
+          ),
           ListTile(
             leading: const Icon(Icons.cloud_upload),
             title: Text(l10n.backupData),
@@ -241,7 +276,6 @@ class SettingsScreen extends ConsumerWidget {
             title: Text(l10n.restoreData),
             subtitle: Text(l10n.restoreSubtitle),
             onTap: () async {
-              // Show confirmation dialog before restoring
               final confirm = await showDialog<bool>(
                 context: context,
                 builder: (ctx) => AlertDialog(
@@ -266,11 +300,8 @@ class SettingsScreen extends ConsumerWidget {
               if (confirm == true) {
                 final success = await BackupService().restoreBackup(context);
                 if (success) {
-                  // REFRESH RIVERPOD STATE
-                  // This forces the providers to re-fetch the new data from the DB
                   ref.invalidate(transactionsProvider);
                   ref.invalidate(categoriesProvider);
-                  // Optionally navigate back to Dashboard
                   Navigator.pop(context);
                 }
               }
@@ -295,7 +326,6 @@ class SettingsScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
-          // BACKUP BUTTON
           ListTile(
             leading: const Icon(Icons.call),
             title: Text(l10n.phoneNumber),
@@ -309,10 +339,66 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  void _showApiKeyDialog(BuildContext context) {
+    final controller = TextEditingController(text: ref.read(apiKeyProvider));
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Set Gemini API Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: controller,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: 'Enter your API key here',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => launchUrl(
+                Uri.parse('https://aistudio.google.com/app/apikey'),
+              ),
+              child: const Text(
+                'How to get an API key?',
+                style: TextStyle(
+                  fontSize: 12,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              ref.read(apiKeyProvider.notifier).setKey(controller.text);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('API Key saved successfully!'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _makePhoneCall() async {
     final Uri launchUri = Uri(scheme: 'tel', path: '+201126052979');
     await launchUrl(launchUri);
   }
-
-
 }

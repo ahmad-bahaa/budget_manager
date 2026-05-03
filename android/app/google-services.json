@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "705732616836",
+    "project_id": "budget-manager-15f81",
+    "storage_bucket": "budget-manager-15f81.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705732616836:android:e47ec498526b47138618d1",
+        "android_client_info": {
+          "package_name": "com.ninjageeksco.budget_manager"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705732616836-0ild6ep5qv1qa3b2und53c7hb5dc6su6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ninjageeksco.budget_manager",
+            "certificate_hash": "87d9ef9e3c7d9b9ff22e9a93b4d79c6364cc3ddc"
+          }
+        },
+        {
+          "client_id": "705732616836-57a4gbsud8m6444q5o2va96pe5dn3un5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ninjageeksco.budget_manager",
+            "certificate_hash": "02285f65cf7197d289249fa33b370f955c45e921"
+          }
+        },
+        {
+          "client_id": "705732616836-42od9ls9rbl9943roinkra436vkn1e12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCd1R7Fyu1VKhOJpR-itn51UjcClE0SPCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705732616836-42od9ls9rbl9943roinkra436vkn1e12.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

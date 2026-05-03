@@ -1,8 +1,8 @@
 import 'package:budget_manager/providers/budget_providers.dart';
 import 'package:budget_manager/providers/language_provider.dart';
-import 'package:budget_manager/screens/dashboard_screen.dart';
 import 'package:budget_manager/screens/onboarding_screen.dart';
 import 'package:budget_manager/screens/splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:showcaseview/showcaseview.dart';
@@ -12,6 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() async {
   // Ensure Flutter bindings are initialized before database setup
   WidgetsFlutterBinding.ensureInitialized();
+  
+  await Firebase.initializeApp();
+
   // Check if the user has seen the onboarding screen
   final prefs = await SharedPreferences.getInstance();
   final showHome = prefs.getBool('has_seen_onboarding') ?? false;

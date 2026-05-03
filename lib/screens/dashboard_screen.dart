@@ -11,6 +11,7 @@ import '../providers/budget_providers.dart';
 import '../models/category_model.dart';
 import 'add_category_screen.dart';
 import 'add_transaction_screen.dart';
+import 'ai_advisor_screen.dart';
 import 'all_transactions_screen.dart';
 import 'budget_setup_screen.dart';
 import 'category_detail_screen.dart';
@@ -267,6 +268,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         isDarkMode,
                       ),
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AIAdvisorScreen(),
+                          ),
+                        );
+                        //
                         // Navigator.push(
                         //   context,
                         //   MaterialPageRoute(
@@ -342,7 +350,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                         );
                       },
-                      icon:  Icon(Icons.add_circle_outline,color: colorSeed,),
+                      icon: Icon(Icons.add_circle_outline, color: colorSeed),
                       label: Text(
                         l10n.addCategoryAction,
                         style: TextStyle(color: colorSeed),
@@ -405,7 +413,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   // --- Helper Widgets ---
 
-  Widget _buildSavingsGoalsQuickCard(BuildContext context, AppLocalizations l10n, Color colorSeed, bool isDarkMode) {
+  Widget _buildSavingsGoalsQuickCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    Color colorSeed,
+    bool isDarkMode,
+  ) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -436,7 +449,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 color: Colors.white.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_graph_rounded, color: Colors.white, size: 32),
+              child: const Icon(
+                Icons.auto_graph_rounded,
+                color: Colors.white,
+                size: 32,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -462,7 +479,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 20),
+            const Icon(
+              Icons.arrow_forward_ios_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ],
         ),
       ),
@@ -725,8 +746,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         color: ThemeColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: isDarkMode
-            ? [BoxShadow(color: Colors.white.withValues(alpha: 0.3), blurRadius: 10)]
-            : [BoxShadow(color: Colors.grey.withValues(alpha: 0.3), blurRadius: 10)],
+            ? [
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                ),
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  blurRadius: 10,
+                ),
+              ],
       ),
       child: Column(
         children: [

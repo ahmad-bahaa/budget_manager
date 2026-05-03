@@ -16,7 +16,7 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  
+
   int _selectedIconCode = Icons.savings.codePoint;
   Color _selectedColor = Colors.blue;
 
@@ -70,7 +70,9 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
             children: [
               Text(
                 l10n.newGoal,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -79,23 +81,35 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
                 decoration: InputDecoration(
                   labelText: l10n.goalTitle,
                   hintText: l10n.macBookHint,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: Icon(IconData(_selectedIconCode, fontFamily: 'MaterialIcons'), color: _selectedColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(
+                    IconData(_selectedIconCode, fontFamily: 'MaterialIcons'),
+                    color: _selectedColor,
+                  ),
                 ),
-                validator: (value) => value == null || value.isEmpty ? l10n.enterNameError : null,
+                validator: (value) =>
+                    value == null || value.isEmpty ? l10n.enterNameError : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _amountController,
                 decoration: InputDecoration(
                   labelText: l10n.targetAmount,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   prefixIcon: const Icon(Icons.attach_money),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: (value) {
-                  if (value == null || value.isEmpty) return l10n.enterAmountError;
-                  if (double.tryParse(value) == null) return l10n.validNumberError;
+                  if (value == null || value.isEmpty)
+                    return l10n.enterAmountError;
+                  if (double.tryParse(value) == null)
+                    return l10n.validNumberError;
                   return null;
                 },
               ),
@@ -105,7 +119,8 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   itemCount: _colors.length,
-                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final color = _colors[index];
                     return GestureDetector(
@@ -116,7 +131,12 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
                           color: color,
                           shape: BoxShape.circle,
                           border: _selectedColor == color
-                              ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 3)
+                              ? Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                  width: 3,
+                                )
                               : null,
                         ),
                       ),
@@ -138,14 +158,22 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
                   final icon = _icons[index];
                   final isSelected = _selectedIconCode == icon.codePoint;
                   return GestureDetector(
-                    onTap: () => setState(() => _selectedIconCode = icon.codePoint),
+                    onTap: () =>
+                        setState(() => _selectedIconCode = icon.codePoint),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? _selectedColor.withValues(alpha: 0.2) : Colors.grey.withValues(alpha: 0.1),
+                        color: isSelected
+                            ? _selectedColor.withValues(alpha: 0.2)
+                            : Colors.grey.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: isSelected ? Border.all(color: _selectedColor, width: 2) : null,
+                        border: isSelected
+                            ? Border.all(color: _selectedColor, width: 2)
+                            : null,
                       ),
-                      child: Icon(icon, color: isSelected ? _selectedColor : Colors.grey[600]),
+                      child: Icon(
+                        icon,
+                        color: isSelected ? _selectedColor : Colors.grey[600],
+                      ),
                     ),
                   );
                 },
@@ -155,7 +183,9 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
                 onPressed: _saveGoal,
                 style: FilledButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(l10n.saveGoal),
               ),
@@ -174,7 +204,8 @@ class _CreateGoalSheetState extends ConsumerState<CreateGoalSheet> {
         targetAmount: double.parse(_amountController.text),
         savedAmount: 0,
         iconCodePoint: _selectedIconCode,
-        colorHex: '#${_selectedColor.toARGB32().toRadixString(16).padLeft(8, '0')}',
+        colorHex:
+            '#${_selectedColor.toARGB32().toRadixString(16).padLeft(8, '0')}',
       );
       ref.read(savingsGoalsProvider.notifier).addGoal(goal);
       Navigator.pop(context);

@@ -131,5 +131,30 @@
       }
     }
   },
-  "macBookHint": "مثلاً: ماك بوك جديد"
+  "macBookHint": "مثلاً: ماك بوك جديد",
+  "cloudSync": "مزامنة سحابية",
+  "cloudSyncSubtitle": "زامن بياناتك مع جوجل درايف",
+  "signInWithGoogle": "تسجيل الدخول بجوجل",
+  "signOut": "تسجيل الخروج",
+  "syncNow": "زامن الآن",
+  "lastSynced": "آخر مزامنة: {time}",
+  "@lastSynced": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "syncing": "جاري المزامنة...",
+  "syncSuccess": "تمت المزامنة بنجاح!",
+  "syncError": "فشلت المزامنة: {error}",
+  "@syncError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noInternet": "لا يوجد اتصال بالإنترنت",
+  "privacyDescription": "يتم تخزين بياناتك في مجلد 'بيانات التطبيق' الخاص بك على جوجل درايف، ولا يمكن لأحد الوصول إليه غير هذا التطبيق."
 }

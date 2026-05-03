@@ -15,10 +15,7 @@ class SavingsGoalsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.savingsGoals),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text(l10n.savingsGoals), centerTitle: true),
       body: goals.isEmpty
           ? _buildEmptyState(context, l10n)
           : _buildGoalsList(context, ref, goals, l10n),
@@ -42,16 +39,18 @@ class SavingsGoalsScreen extends ConsumerWidget {
             Icon(
               Icons.auto_graph_rounded,
               size: 100,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 24),
             Text(
               l10n.setFirstGoal,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.grey[700],
-                    fontWeight: FontWeight.w500,
-                  ),
+                color: Colors.grey[700],
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 32),
             FilledButton.icon(
@@ -59,7 +58,10 @@ class SavingsGoalsScreen extends ConsumerWidget {
               icon: const Icon(Icons.add),
               label: Text(l10n.createGoal),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
               ),
             ),
           ],
@@ -68,7 +70,12 @@ class SavingsGoalsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildGoalsList(BuildContext context, WidgetRef ref, List<SavingsGoalModel> goals, AppLocalizations l10n) {
+  Widget _buildGoalsList(
+    BuildContext context,
+    WidgetRef ref,
+    List<SavingsGoalModel> goals,
+    AppLocalizations l10n,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: goals.length,
@@ -97,7 +104,9 @@ class _SavingsGoalCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final goalColor = Color(int.parse(goal.colorHex.replaceFirst('#', ''), radix: 16));
+    final goalColor = Color(
+      int.parse(goal.colorHex.replaceFirst('#', ''), radix: 16),
+    );
 
     return Dismissible(
       key: Key(goal.id),
@@ -147,16 +156,14 @@ class _SavingsGoalCard extends ConsumerWidget {
                       children: [
                         Text(
                           goal.title,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${goal.savedAmount.toStringAsFixed(0)} / ${goal.targetAmount.toStringAsFixed(0)}',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                       ],
                     ),
@@ -189,9 +196,9 @@ class _SavingsGoalCard extends ConsumerWidget {
                 child: Text(
                   '${(goal.progress * 100).toStringAsFixed(0)}%',
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: goalColor,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: goalColor,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

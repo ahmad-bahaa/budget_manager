@@ -7,7 +7,7 @@ import '../providers/budget_providers.dart';
 import 'package:budget_manager/l10n/app_localizations.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
-  final TransactionModel? transactionToEdit; 
+  final TransactionModel? transactionToEdit;
   const AddTransactionScreen({super.key, this.transactionToEdit});
 
   @override
@@ -167,9 +167,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               error: (err, _) => Text('Error: $err'),
               data: (categories) {
                 if (categories.isEmpty) {
-                  return Text(
-                    l10n.noCategoriesWarning,
-                  );
+                  return Text(l10n.noCategoriesWarning);
                 }
                 return DropdownButtonFormField<int>(
                   decoration: InputDecoration(

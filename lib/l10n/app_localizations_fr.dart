@@ -1,6 +1,10 @@
+// ignore: unused_import
 import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
+// ignore_for_file: type=lint
+
+/// The translations for French (`fr`).
 class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
@@ -116,7 +120,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noCategoriesMessage => 'Aucune catégorie trouvée.';
 
   @override
-  String get noCategoriesWarning => 'Aucune catégorie trouvée. Veuillez d\'abord en ajouter une.';
+  String get noCategoriesWarning =>
+      'Aucune catégorie trouvée. Veuillez d\'abord en ajouter une.';
 
   @override
   String get setBudgetHint => 'Définissez un budget pour voir les graphiques';
@@ -128,13 +133,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteCategoryTitle => 'Supprimer la catégorie ?';
 
   @override
-  String get deleteCategoryMessage => 'Cela supprimera toutes les transactions de cette catégorie.';
+  String get deleteCategoryMessage =>
+      'Cela supprimera toutes les transactions de cette catégorie.';
 
   @override
   String get deleteTransactionTitle => 'Supprimer la transaction ?';
 
   @override
-  String get deleteTransactionMessage => 'Cette action ne peut pas être annulée.';
+  String get deleteTransactionMessage =>
+      'Cette action ne peut pas être annulée.';
 
   @override
   String get categoryCreatedMessage => 'Catégorie créée avec succès';
@@ -197,16 +204,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get currencySymbol => 'Symbole de la devise';
 
   @override
-  String currentValue(String value) => 'Actuel : $value';
+  String currentValue(String value) {
+    return 'Actuel : $value';
+  }
 
   @override
   String get monthlyCycleStart => 'Début du cycle mensuel';
 
   @override
-  String currentCycleDay(int day) => 'Jour actuel : $day du mois';
+  String currentCycleDay(int day) {
+    return 'Jour actuel : $day du mois';
+  }
 
   @override
-  String day(int day) => 'Jour $day';
+  String day(int day) {
+    return 'Jour $day';
+  }
 
   @override
   String get dateFormat => 'Format de date';
@@ -245,13 +258,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get restoreData => 'Restaurer les données';
 
   @override
-  String get restoreSubtitle => 'Importer des données depuis un fichier de sauvegarde';
+  String get restoreSubtitle =>
+      'Importer des données depuis un fichier de sauvegarde';
 
   @override
   String get restoreBackupTitle => 'Restaurer la sauvegarde ?';
 
   @override
-  String get restoreWarning => '⚠️ Avertissement : Cela écrasera toutes les données actuelles sur cet appareil. Cette action est irréversible.';
+  String get restoreWarning =>
+      '⚠️ Avertissement : Cela écrasera toutes les données actuelles sur cet appareil. Cette action est irréversible.';
 
   @override
   String get cancel => 'Annuler';
@@ -266,56 +281,109 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumber => 'Numéro de téléphone';
 
   @override
-  String get settingsShowcaseDescription => 'Appuyez pour ouvrir les paramètres et modifier vos préférences telles que le cycle mensuel personnalisé et la devise';
+  String get settingsShowcaseDescription =>
+      'Appuyez pour ouvrir les paramètres et modifier vos préférences telles que le cycle mensuel personnalisé et la devise';
 
   @override
-  String get budgetShowcaseDescription => 'Ici pour suivre le budget total défini lors de l\'ajout de catégories';
+  String get budgetShowcaseDescription =>
+      'Ici pour suivre le budget total défini lors de l\'ajout de catégories';
 
   @override
-  String get expensesShowcaseDescription => 'Cliquez ici pour voir toutes vos dépenses';
+  String get expensesShowcaseDescription =>
+      'Cliquez ici pour voir toutes vos dépenses';
 
   @override
-  String get addCategoryShowcaseDescription => 'Cliquez ici pour ajouter une nouvelle catégorie';
+  String get addCategoryShowcaseDescription =>
+      'Cliquez ici pour ajouter une nouvelle catégorie';
 
   @override
-  String errorLabel(String error) => 'Erreur : $error';
+  String errorLabel(String error) {
+    return 'Erreur : $error';
+  }
 
   @override
-  String percentFormat(String value) => '($value%)';
+  String percentFormat(String value) {
+    return '($value%)';
+  }
 
   @override
-  String get savingsGoals => 'Objectifs d\'épargne';
+  String percentage(String value) {
+    return '$value%';
+  }
 
   @override
-  String get setFirstGoal => 'Fixez votre premier objectif d\'épargne !';
+  String get savingsGoals => 'Savings Goals';
 
   @override
-  String get createGoal => 'Créer un objectif';
+  String get setFirstGoal => 'Set your first savings goal!';
 
   @override
-  String get newGoal => 'Nouvel objectif';
+  String get createGoal => 'Create Goal';
 
   @override
-  String get goalTitle => 'Titre de l\'objectif';
+  String get newGoal => 'New Goal';
 
   @override
-  String get targetAmount => 'Montant cible';
+  String get goalTitle => 'Goal Title';
 
   @override
-  String get saveGoal => 'Enregistrer l\'objectif';
+  String get targetAmount => 'Target Amount';
 
   @override
-  String get addFunds => 'Ajouter des fonds';
+  String get saveGoal => 'Save Goal';
 
   @override
-  String get howMuchToAdd => 'Combien souhaitez-vous ajouter ?';
+  String get addFunds => 'Add Funds';
 
   @override
-  String get confirm => 'Confirmer';
+  String get howMuchToAdd => 'How much would you like to add?';
 
   @override
-  String fundsAddedMessage(String amount) => 'Génial ! Vous êtes plus proche de votre objectif de $amount !';
+  String get confirm => 'Confirm';
 
   @override
-  String get macBookHint => 'ex: Nouveau MacBook';
+  String fundsAddedMessage(String amount) {
+    return 'Awesome! You are $amount closer to your goal!';
+  }
+
+  @override
+  String get macBookHint => 'e.g. New MacBook';
+
+  @override
+  String get cloudSync => 'Cloud Sync';
+
+  @override
+  String get cloudSyncSubtitle => 'Sync your data with Google Drive';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String lastSynced(String time) {
+    return 'Last Synced: $time';
+  }
+
+  @override
+  String get syncing => 'Syncing...';
+
+  @override
+  String get syncSuccess => 'Sync completed successfully!';
+
+  @override
+  String syncError(String error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String get noInternet => 'No internet connection';
+
+  @override
+  String get privacyDescription =>
+      'Your data is stored in your private Google Drive \'App Data\' folder, accessible only by this app.';
 }

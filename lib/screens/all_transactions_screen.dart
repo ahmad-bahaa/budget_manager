@@ -30,7 +30,10 @@ class AllTransactionsScreen extends ConsumerWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(l10n.allTransactionsTitle, style: const TextStyle(fontSize: 16)),
+            Text(
+              l10n.allTransactionsTitle,
+              style: const TextStyle(fontSize: 16),
+            ),
             const SizedBox(height: 10),
             Text(
               rangeText, // Dynamic range based on your Payday
@@ -155,7 +158,8 @@ class AllTransactionsScreen extends ConsumerWidget {
                           top: Radius.circular(20),
                         ),
                       ),
-                      builder: (_) => AddTransactionScreen(transactionToEdit: tx),
+                      builder: (_) =>
+                          AddTransactionScreen(transactionToEdit: tx),
                     );
                   },
                 ),

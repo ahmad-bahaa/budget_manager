@@ -27,11 +27,10 @@ class BackupService {
         text: 'Budget Manager Backup',
         subject: 'My Budget Backup',
       );
-
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Backup Failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Backup Failed: $e')));
     }
   }
 
@@ -47,9 +46,12 @@ class BackupService {
 
       // Basic validation: Check if file is likely a SQLite DB
       // (Real validation is harder, but this prevents picking random JPEGs)
-      if (!sourceFile.path.endsWith('.db') && !sourceFile.path.endsWith('.sqlite')) {
+      if (!sourceFile.path.endsWith('.db') &&
+          !sourceFile.path.endsWith('.sqlite')) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Invalid file format. Please select a .db file.')),
+          const SnackBar(
+            content: Text('Invalid file format. Please select a .db file.'),
+          ),
         );
         return false;
       }
@@ -66,11 +68,10 @@ class BackupService {
       );
 
       return true; // Return true to signal the UI to reload
-
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Restore Failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Restore Failed: $e')));
       return false;
     }
   }

@@ -168,10 +168,8 @@ class DatabaseHelper {
         ? DateTime(month.year, month.month - 1, day)
         : DateTime(month.year, month.month, day);
     final endOfMonth = day > currentDay
-        ? DateTime(month.year, month.month, day )
-        : DateTime(month.year, month.month +1 , day  );
-
-
+        ? DateTime(month.year, month.month, day)
+        : DateTime(month.year, month.month + 1, day);
 
     final result = await db.query(
       'transactions',
@@ -208,7 +206,7 @@ class DatabaseHelper {
         : DateTime(month.year, month.month, startDay);
     final endOfMonth = startDay > currentDay
         ? DateTime(month.year, month.month, startDay - 1)
-        : DateTime(month.year, month.month +1 , startDay - 1 );
+        : DateTime(month.year, month.month + 1, startDay - 1);
 
     final result = await db.query(
       'transactions',

@@ -42,17 +42,20 @@ class CategoriesNotifier
 
   Future<void> addCategory(CategoryModel category) async {
     await DatabaseHelper.instance.createCategory(category);
+    await PreferencesService().updateLastUpdated();
     await _fetchCategories(); // Refresh list
   }
 
   Future<void> updateCategory(CategoryModel category) async {
     if (category.id == null) return;
     await DatabaseHelper.instance.update('categories', category.toMap());
+    await PreferencesService().updateLastUpdated();
     await _fetchCategories();
   }
 
   Future<void> deleteCategory(int id) async {
     await DatabaseHelper.instance.delete('categories', id);
+    await PreferencesService().updateLastUpdated();
     await _fetchCategories();
   }
 }
@@ -94,7 +97,7 @@ class TransactionsNotifier
 
       final transactions = await DatabaseHelper.instance.getTransactionsByCycle(
         startDay,
-        date
+        date,
       );
       state = AsyncValue.data(transactions);
     } catch (e, stack) {
@@ -104,6 +107,7 @@ class TransactionsNotifier
 
   Future<void> addTransaction(TransactionModel transaction) async {
     await DatabaseHelper.instance.createTransaction(transaction);
+    await PreferencesService().updateLastUpdated();
     await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 
@@ -112,12 +116,13 @@ class TransactionsNotifier
 
   Future<void> updateTransaction(TransactionModel transaction) async {
     await DatabaseHelper.instance.update('transactions', transaction.toMap());
-
+    await PreferencesService().updateLastUpdated();
     await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 
   Future<void> deleteTransaction(int id) async {
     await DatabaseHelper.instance.delete('transactions', id);
+    await PreferencesService().updateLastUpdated();
     await _fetchTransactionsCycle(); // Refresh list to update UI
   }
 }
@@ -218,6 +223,7 @@ class CurrencyNotifier extends StateNotifier<String> {
   Future<void> setCurrency(String newCurrency) async {
     state = newCurrency; // Update UI immediately
     await PreferencesService().setCurrency(newCurrency); // Save to disk
+    await PreferencesService().updateLastUpdated();
   }
 }
 
@@ -239,6 +245,7 @@ class DateFormatNotifier extends StateNotifier<String> {
   Future<void> setFormat(String newFormat) async {
     state = newFormat; // Update UI
     await PreferencesService().setDateFormat(newFormat); // Save to disk
+    await PreferencesService().updateLastUpdated();
   }
 }
 
@@ -262,6 +269,7 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
   Future<void> setTheme(ThemeMode mode) async {
     state = mode;
     await PreferencesService().setThemeMode(mode);
+    await PreferencesService().updateLastUpdated();
   }
 }
 
@@ -286,6 +294,7 @@ class ColorSeedNotifier extends StateNotifier<Color> {
   Future<void> setColor(Color color) async {
     state = color;
     await PreferencesService().setColorSeed(color.value);
+    await PreferencesService().updateLastUpdated();
   }
 }
 
@@ -317,18 +326,17 @@ class CycleStartDayNotifier extends StateNotifier<int> {
   Future<void> setDay(int day) async {
     state = day;
     await PreferencesService().setCycleStartDay(day);
+    await PreferencesService().updateLastUpdated();
   }
 }
+
 // This holds the mapped budgets: { "food_id": 500.0, "rent_id": 1200.0 }
 class CategoryBudgetsNotifier extends StateNotifier<Map<String, double>> {
   CategoryBudgetsNotifier() : super({});
 
   // Update a single category's budget
   void setBudget(String categoryId, double amount) {
-    state = {
-      ...state,
-      categoryId: amount,
-    };
+    state = {...state, categoryId: amount};
     // TODO: In the future, save this to SharedPreferences or your local database here
   }
 
@@ -338,6 +346,7 @@ class CategoryBudgetsNotifier extends StateNotifier<Map<String, double>> {
   }
 }
 
-final categoryBudgetsProvider = StateNotifierProvider<CategoryBudgetsNotifier, Map<String, double>>((ref) {
-  return CategoryBudgetsNotifier();
-});
+final categoryBudgetsProvider =
+    StateNotifierProvider<CategoryBudgetsNotifier, Map<String, double>>((ref) {
+      return CategoryBudgetsNotifier();
+    });

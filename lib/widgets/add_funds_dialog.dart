@@ -58,19 +58,27 @@ class _AddFundsDialogState extends ConsumerState<AddFundsDialog> {
           onPressed: () {
             final amount = double.tryParse(_amountController.text);
             if (amount != null && amount > 0) {
-              ref.read(savingsGoalsProvider.notifier).addFunds(widget.goal.id, amount);
+              ref
+                  .read(savingsGoalsProvider.notifier)
+                  .addFunds(widget.goal.id, amount);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(l10n.fundsAddedMessage(amount.toStringAsFixed(2))),
+                  content: Text(
+                    l10n.fundsAddedMessage(amount.toStringAsFixed(2)),
+                  ),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
             }
           },
           style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: Text(l10n.confirm),
         ),
