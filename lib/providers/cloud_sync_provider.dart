@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_helper.dart';
 import '../services/firebase_sync_service.dart';
 import '../services/shared_preferences.dart';
+import 'api_key_provider.dart';
 import 'budget_providers.dart';
 import 'savings_goals_provider.dart';
 
@@ -141,12 +142,14 @@ class CloudSyncNotifier extends StateNotifier<CloudSyncState> {
     final savingsGoals = ref.read(savingsGoalsProvider);
     final settings = await _prefs.getAllSettings();
     final lastUpdated = await _prefs.getLastUpdated();
+    final geminiApiKey = ref.read(apiKeyProvider);
 
     return {
       'categories': categories.map((c) => c.toMap()).toList(),
       'transactions': transactions.map((t) => t.toMap()).toList(),
       'savings_goals': savingsGoals.map((g) => g.toMap()).toList(),
       'settings': settings,
+      'gemini_api_key': geminiApiKey,
       'last_updated': lastUpdated.millisecondsSinceEpoch,
     };
   }
@@ -171,6 +174,12 @@ class CloudSyncNotifier extends StateNotifier<CloudSyncState> {
     await prefs.setString('savings_goals', goalsJson);
 
     await _prefs.restoreSettings(data['settings'] ?? {});
+    
+    final String cloudApiKey = data['gemini_api_key'] ?? '';
+    if (cloudApiKey.isNotEmpty) {
+      await ref.read(apiKeyProvider.notifier).setKey(cloudApiKey);
+    }
+
     await prefs.setInt('last_updated', data['last_updated']);
 
     ref.invalidate(categoriesProvider);
@@ -181,6 +190,7 @@ class CloudSyncNotifier extends StateNotifier<CloudSyncState> {
     ref.invalidate(themeModeProvider);
     ref.invalidate(themeColorProvider);
     ref.invalidate(cycleStartDayProvider);
+    ref.invalidate(apiKeyProvider);
   }
 }
 
