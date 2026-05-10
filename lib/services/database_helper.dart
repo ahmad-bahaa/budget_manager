@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/category_model.dart';
@@ -13,20 +14,65 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('budget_tracker.db');
-    return _database!;
+    try {
+      if (kIsWeb) {
+        // Add a timeout for web database initialization to avoid hanging forever
+        _database = await _initDB('budget_tracker.db').timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception(
+              'Database initialization timed out. Please ensure sqlite3.wasm is present in the web folder.',
+            );
+          },
+        );
+      } else {
+        _database = await _initDB('budget_tracker.db');
+      }
+      return _database!;
+    } catch (e) {
+      debugPrint('Database Error: $e');
+      rethrow;
+    }
   }
 
   Future<Database> _initDB(String filePath) async {
+    debugPrint('Initializing database at $filePath');
+    if (kIsWeb) {
+      debugPrint('Web environment detected, opening database...');
+      return await openDatabase(
+        filePath,
+        version: 2,
+        onCreate: _createDB,
+        onUpgrade: _onUpgrade,
+        onConfigure: _onConfigure,
+      );
+    }
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+    debugPrint('Native environment, path: $path');
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
     );
+  }
+
+  // Handle database upgrades
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+        'ALTER TABLE transactions ADD COLUMN is_recurring INTEGER DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE transactions ADD COLUMN recurrence_interval TEXT',
+      );
+      await db.execute(
+        'ALTER TABLE transactions ADD COLUMN last_processed_date TEXT',
+      );
+    }
   }
 
   // Enable foreign keys
@@ -54,6 +100,9 @@ class DatabaseHelper {
         date TEXT NOT NULL,
         category_id INTEGER NOT NULL,
         note TEXT,
+        is_recurring INTEGER DEFAULT 0,
+        recurrence_interval TEXT,
+        last_processed_date TEXT,
         FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
       )
     ''');
@@ -79,6 +128,7 @@ class DatabaseHelper {
 
   // 1. Expose the database path getter
   Future<String> get dbPath async {
+    if (kIsWeb) return 'budget_tracker.db';
     final dbPath = await getDatabasesPath();
     return join(
       dbPath,
@@ -219,6 +269,15 @@ class DatabaseHelper {
       orderBy: 'date DESC',
     );
 
+    return result.map((json) => TransactionModel.fromMap(json)).toList();
+  }
+
+  Future<List<TransactionModel>> getRecurringTransactions() async {
+    final db = await instance.database;
+    final result = await db.query(
+      'transactions',
+      where: 'is_recurring = 1',
+    );
     return result.map((json) => TransactionModel.fromMap(json)).toList();
   }
 

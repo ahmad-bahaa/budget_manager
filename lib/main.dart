@@ -1,19 +1,44 @@
+import 'package:budget_manager/firebase_options.dart';
 import 'package:budget_manager/providers/budget_providers.dart';
 import 'package:budget_manager/providers/language_provider.dart';
 import 'package:budget_manager/screens/onboarding_screen.dart';
 import 'package:budget_manager/screens/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized before database setup
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp();
+
+  if (kIsWeb) {
+    try {
+      // Initialize the database factory for web WITHOUT a web worker
+      // This avoids the dependency on sqflite_sw.js
+      databaseFactory = createDatabaseFactoryFfiWeb(
+        noWebWorker: true,
+        options: SqfliteFfiWebOptions(
+          sqlite3WasmUri: Uri.parse('sqlite3.wasm'),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error initializing database factory for web: $e');
+    }
+  }
+
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+  }
 
   // Check if the user has seen the onboarding screen
   final prefs = await SharedPreferences.getInstance();

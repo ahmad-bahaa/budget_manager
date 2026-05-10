@@ -4,6 +4,9 @@ class TransactionModel {
   final DateTime date;
   final int categoryId; // Foreign key
   final String? note;
+  final bool isRecurring;
+  final String? recurrenceInterval; // 'daily', 'weekly', 'monthly'
+  final DateTime? lastProcessedDate;
 
   TransactionModel({
     this.id,
@@ -11,6 +14,9 @@ class TransactionModel {
     required this.date,
     required this.categoryId,
     this.note,
+    this.isRecurring = false,
+    this.recurrenceInterval,
+    this.lastProcessedDate,
   });
 
   Map<String, dynamic> toMap() {
@@ -21,6 +27,9 @@ class TransactionModel {
       'date': date.toIso8601String(),
       'category_id': categoryId,
       'note': note,
+      'is_recurring': isRecurring ? 1 : 0,
+      'recurrence_interval': recurrenceInterval,
+      'last_processed_date': lastProcessedDate?.toIso8601String(),
     };
   }
 
@@ -31,6 +40,11 @@ class TransactionModel {
       date: DateTime.parse(map['date']),
       categoryId: map['category_id'],
       note: map['note'],
+      isRecurring: map['is_recurring'] == 1,
+      recurrenceInterval: map['recurrence_interval'],
+      lastProcessedDate: map['last_processed_date'] != null
+          ? DateTime.parse(map['last_processed_date'])
+          : null,
     );
   }
 
@@ -40,6 +54,9 @@ class TransactionModel {
     DateTime? date,
     int? categoryId,
     String? note,
+    bool? isRecurring,
+    String? recurrenceInterval,
+    DateTime? lastProcessedDate,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -47,6 +64,9 @@ class TransactionModel {
       date: date ?? this.date,
       categoryId: categoryId ?? this.categoryId,
       note: note ?? this.note,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceInterval: recurrenceInterval ?? this.recurrenceInterval,
+      lastProcessedDate: lastProcessedDate ?? this.lastProcessedDate,
     );
   }
 }

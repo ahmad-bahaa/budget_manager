@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/transaction_model.dart';
 import '../providers/budget_providers.dart';
+import '../providers/api_key_provider.dart';
+import '../services/gemini_budget_service.dart';
+import '../services/ocr_service.dart';
 import 'package:budget_manager/l10n/app_localizations.dart';
 
 class AddTransactionScreen extends ConsumerStatefulWidget {
@@ -21,11 +25,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   final _noteController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   int? _selectedCategoryId;
+  bool _isRecurring = false;
+  String _recurrenceInterval = 'monthly';
+  bool _isScanning = false;
+  bool _isSuggestingCategory = false;
+
+  final OcrService _ocrService = OcrService();
 
   @override
   void dispose() {
     _amountController.dispose();
     _noteController.dispose();
+    _ocrService.dispose();
     super.dispose();
   }
 
@@ -38,6 +49,107 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       _noteController.text = tx.note ?? '';
       _selectedDate = tx.date;
       _selectedCategoryId = tx.categoryId;
+      _isRecurring = tx.isRecurring;
+      _recurrenceInterval = tx.recurrenceInterval ?? 'monthly';
+    }
+  }
+
+  Future<void> _scanReceipt() async {
+    final apiKey = ref.read(apiKeyProvider);
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please set your Gemini API key in Settings first.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+
+    if (image != null) {
+      setState(() {
+        _isScanning = true;
+      });
+
+      try {
+        final ocrText = await _ocrService.scanReceipt(image);
+        if (ocrText != null) {
+          final apiKey = ref.read(apiKeyProvider);
+          if (apiKey.isNotEmpty) {
+            final gemini = GeminiBudgetService(apiKey: apiKey);
+            final result = await gemini.parseReceiptText(ocrText);
+            if (result != null) {
+              setState(() {
+                if (result['amount'] != null) {
+                  _amountController.text = result['amount'].toString();
+                }
+                if (result['note'] != null) {
+                  _noteController.text = result['note'];
+                }
+                if (result['date'] != null) {
+                  try {
+                    _selectedDate = DateTime.parse(result['date']);
+                  } catch (_) {}
+                }
+              });
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('Error scanning receipt: $e');
+      } finally {
+        setState(() {
+          _isScanning = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _suggestCategory() async {
+    final apiKey = ref.read(apiKeyProvider);
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please set your Gemini API key in Settings first.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final note = _noteController.text;
+    if (note.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a note first for AI to suggest a category.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSuggestingCategory = true;
+    });
+
+    try {
+      final categories = ref.read(categoriesProvider).value ?? [];
+      final gemini = GeminiBudgetService(apiKey: apiKey);
+      final suggestedId = await gemini.suggestCategory(note, categories);
+      if (suggestedId != null) {
+        setState(() {
+          _selectedCategoryId = suggestedId;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error suggesting category: $e');
+    } finally {
+      setState(() {
+        _isSuggestingCategory = false;
+      });
     }
   }
 
@@ -67,6 +179,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         date: _selectedDate,
         categoryId: _selectedCategoryId!,
         note: enteredNote.isEmpty ? null : enteredNote,
+        isRecurring: _isRecurring,
+        recurrenceInterval: _isRecurring ? _recurrenceInterval : null,
       );
       if (widget.transactionToEdit != null) {
         ref
@@ -117,7 +231,23 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-
+            if (widget.transactionToEdit == null) ...[
+              OutlinedButton.icon(
+                onPressed: _isScanning ? null : _scanReceipt,
+                icon: _isScanning
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                    : const Icon(Icons.receipt_long),
+                label: Text(_isScanning ? 'Scanning...' : 'Scan Receipt'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
             TextFormField(
               controller: _amountController,
               decoration: InputDecoration(
@@ -169,32 +299,94 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 if (categories.isEmpty) {
                   return Text(l10n.noCategoriesWarning);
                 }
-                return DropdownButtonFormField<int>(
-                  decoration: InputDecoration(
-                    labelText: l10n.categoryLabel,
-                    border: const OutlineInputBorder(),
-                  ),
-                  value: _selectedCategoryId,
-                  items: categories.map((category) {
-                    return DropdownMenuItem(
-                      value: category.id,
-                      child: Row(
-                        children: [
-                          Icon(Icons.circle, color: category.color, size: 16),
-                          const SizedBox(width: 8),
-                          Text(category.name),
-                        ],
+                return Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<int>(
+                        decoration: InputDecoration(
+                          labelText: l10n.categoryLabel,
+                          border: const OutlineInputBorder(),
+                        ),
+                        value: _selectedCategoryId,
+                        items: categories.map((category) {
+                          return DropdownMenuItem(
+                            value: category.id,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.circle,
+                                  color: category.color,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(category.name),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategoryId = value;
+                          });
+                        },
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategoryId = value;
-                    });
-                  },
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed:
+                          _isSuggestingCategory ? null : _suggestCategory,
+                      icon: _isSuggestingCategory
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Icon(Icons.auto_awesome, color: Colors.blue),
+                      tooltip: 'Suggest Category',
+                    ),
+                  ],
                 );
               },
             ),
+            const SizedBox(height: 16),
+
+            SwitchListTile(
+              title: const Text('Recurring Transaction'),
+              subtitle: Text(
+                _isRecurring
+                    ? 'Repeats $_recurrenceInterval'
+                    : 'One-time transaction',
+              ),
+              value: _isRecurring,
+              onChanged: (value) {
+                setState(() {
+                  _isRecurring = value;
+                });
+              },
+              secondary: const Icon(Icons.repeat),
+            ),
+
+            if (_isRecurring)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: DropdownButtonFormField<String>(
+                  value: _recurrenceInterval,
+                  items: const [
+                    DropdownMenuItem(value: 'daily', child: Text('Daily')),
+                    DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                    DropdownMenuItem(value: 'monthly', child: Text('Monthly')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _recurrenceInterval = value!;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    labelText: 'Frequency',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
             const SizedBox(height: 16),
 
             Row(

@@ -32,10 +32,13 @@ class CategoriesNotifier
   }
 
   Future<void> _fetchCategories() async {
+    debugPrint('Fetching categories...');
     try {
       final categories = await DatabaseHelper.instance.getAllCategories();
+      debugPrint('Categories fetched: ${categories.length}');
       state = AsyncValue.data(categories);
     } catch (e, stack) {
+      debugPrint('Error fetching categories: $e');
       state = AsyncValue.error(e, stack);
     }
   }
@@ -72,7 +75,84 @@ class TransactionsNotifier
   final Ref ref;
 
   TransactionsNotifier(this.ref) : super(const AsyncValue.loading()) {
-    _fetchTransactionsCycle();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await _fetchTransactionsCycle();
+    // Use Future.microtask to avoid blocking the initial build/load
+    Future.microtask(() => checkRecurringTransactions());
+  }
+
+  Future<void> checkRecurringTransactions() async {
+    try {
+      final recurring = await DatabaseHelper.instance.getRecurringTransactions();
+      final now = DateTime.now();
+      bool addedAny = false;
+
+      for (var tx in recurring) {
+        DateTime lastProcessed = tx.lastProcessedDate ?? tx.date;
+        DateTime nextDate;
+
+        switch (tx.recurrenceInterval) {
+          case 'daily':
+            nextDate = lastProcessed.add(const Duration(days: 1));
+            break;
+          case 'weekly':
+            nextDate = lastProcessed.add(const Duration(days: 7));
+            break;
+          case 'monthly':
+            nextDate = DateTime(
+              lastProcessed.year,
+              lastProcessed.month + 1,
+              lastProcessed.day,
+            );
+            break;
+          default:
+            continue;
+        }
+
+        while (nextDate.isBefore(now) || nextDate.isAtSameMomentAs(now)) {
+          // Create new transaction
+          final newTx = TransactionModel(
+            amount: tx.amount,
+            date: nextDate,
+            categoryId: tx.categoryId,
+            note: tx.note,
+          );
+          await DatabaseHelper.instance.createTransaction(newTx);
+          
+          // Update last processed date on the template transaction
+          tx = tx.copyWith(lastProcessedDate: nextDate);
+          await DatabaseHelper.instance.update('transactions', tx.toMap());
+          
+          addedAny = true;
+
+          // Move to next occurrence
+          switch (tx.recurrenceInterval) {
+            case 'daily':
+              nextDate = nextDate.add(const Duration(days: 1));
+              break;
+            case 'weekly':
+              nextDate = nextDate.add(const Duration(days: 7));
+              break;
+            case 'monthly':
+              nextDate = DateTime(
+                nextDate.year,
+                nextDate.month + 1,
+                nextDate.day,
+              );
+              break;
+          }
+        }
+      }
+
+      if (addedAny) {
+        await _fetchTransactionsCycle();
+      }
+    } catch (e) {
+      debugPrint('Error checking recurring transactions: $e');
+    }
   }
 
   // Future<void> _fetchTransactions() async {
