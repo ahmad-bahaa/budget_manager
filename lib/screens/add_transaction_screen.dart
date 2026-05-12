@@ -314,7 +314,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                             child: Row(
                               children: [
                                 Icon(
-                                  Icons.circle,
+                                  category.icon,
                                   color: category.color,
                                   size: 16,
                                 ),

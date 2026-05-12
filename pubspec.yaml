@@ -2,7 +2,7 @@ name: budget_manager
 description: "Track expenses, set budgets, and manage your money with complete offline privacy."
 publish_to: 'none'
 
-version: 3.8.0+9
+version: 3.9.0+10
 
 environment:
   sdk: ^3.10.7
@@ -30,6 +30,7 @@ dependencies:
   google_sign_in: ^6.2.1
   connectivity_plus: ^6.1.0
   http: ^1.2.1
+  home_widget: ^0.9.1
 
   flutter_localizations:
     sdk: flutter
@@ -43,6 +44,7 @@ dependencies:
   lottie: ^3.3.2
   showcaseview: ^5.0.1
   sqflite_common_ffi_web: ^1.1.1
+  flutter_secure_storage: ^10.2.0
 
 dev_dependencies:
   flutter_test:

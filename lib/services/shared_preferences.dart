@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class PreferencesService {
   static const String _currencyKey = 'currency_symbol';
@@ -9,6 +10,8 @@ class PreferencesService {
   static const String _cycleStartDayKey = 'cycle_start_day';
   static const String _geminiApiKey = 'gemini_api_key';
   static const String _lastUpdatedKey = 'last_updated';
+
+  final _secureStorage = const FlutterSecureStorage();
 
   Future<void> updateLastUpdated() async {
     final prefs = await SharedPreferences.getInstance();
@@ -47,13 +50,11 @@ class PreferencesService {
   }
 
   Future<void> setGeminiApiKey(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_geminiApiKey, key);
+    await _secureStorage.write(key: _geminiApiKey, value: key);
   }
 
   Future<String> getGeminiApiKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_geminiApiKey) ?? '';
+    return await _secureStorage.read(key: _geminiApiKey) ?? '';
   }
 
   Future<void> setCycleStartDay(int day) async {

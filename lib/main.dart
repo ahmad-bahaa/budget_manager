@@ -3,6 +3,11 @@ import 'package:budget_manager/providers/budget_providers.dart';
 import 'package:budget_manager/providers/language_provider.dart';
 import 'package:budget_manager/screens/onboarding_screen.dart';
 import 'package:budget_manager/screens/splash_screen.dart';
+import 'package:budget_manager/services/home_widget_service.dart';
+import 'package:budget_manager/screens/add_transaction_screen.dart';
+import 'package:budget_manager/providers/home_widget_provider.dart';
+import 'package:budget_manager/utils/transparent_route.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -52,18 +57,74 @@ void main() async {
   );
 }
 
-class BudgetApp extends ConsumerWidget {
+class BudgetApp extends ConsumerStatefulWidget {
   final bool showHome;
 
   const BudgetApp({required this.showHome, super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BudgetApp> createState() => _BudgetAppState();
+}
+
+class _BudgetAppState extends ConsumerState<BudgetApp> {
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    HomeWidgetService.init(_onWidgetClick);
+  }
+
+  void _onWidgetClick(Uri? uri) {
+    if (uri == null) return;
+    
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final context = navigatorKey.currentContext;
+      if (context == null) return;
+
+      if (uri.host == 'add_transaction') {
+        // Push a transparent route that shows the bottom sheet
+        navigatorKey.currentState?.push(
+          TransparentRoute(
+            builder: (ctx) => Scaffold(
+              backgroundColor: Colors.transparent,
+              body: Center(
+                child: Container(), // Empty, bottom sheet will slide over
+              ),
+            ),
+          ),
+        );
+
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => const AddTransactionScreen(),
+        ).then((_) {
+          // When the bottom sheet is closed, if we are in this special mode,
+          // close the app to return to the home screen.
+          if (navigatorKey.currentState?.canPop() ?? false) {
+             navigatorKey.currentState?.pop(); // Pop the transparent route
+          }
+          SystemNavigator.pop(); // Close the app
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(homeWidgetSyncProvider, (previous, next) {});
+    
     final themeMode = ref.watch(themeModeProvider);
     final colorSeed = ref.watch(themeColorProvider);
     final currentLocale = ref.watch(localeProvider);
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       locale: currentLocale,
       // This is crucial for RTL support
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -102,7 +163,7 @@ class BudgetApp extends ConsumerWidget {
         ),
       ),
 
-      home: showHome ? SplashScreen() : OnboardingScreen(),
+      home: widget.showHome ? SplashScreen() : OnboardingScreen(),
     );
   }
 }

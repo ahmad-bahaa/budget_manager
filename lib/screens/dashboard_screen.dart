@@ -624,7 +624,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // 1. The Main Legend Builder
   Widget _buildExpensesLegend(
     BuildContext context,
     double totalBudget,
@@ -638,16 +637,36 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     List<Widget> legendItems = [];
 
-    if (totalSpent > 0) {
-      legendItems.add(
-        _buildLegendIndicator(
-          Colors.redAccent,
-          l10n.totalSpent,
-          totalSpent / totalBudget * 100,
-          currencySymbol,
-        ),
-      );
+    // Group transactions by category to show icons in the legend
+    Map<int, double> categoryTotals = {};
+    for (var tx in currentTransactions) {
+      categoryTotals[tx.categoryId] = (categoryTotals[tx.categoryId] ?? 0) + tx.amount;
     }
+
+    categoryTotals.forEach((categoryId, amount) {
+      if (amount > 0) {
+        final category = categories.firstWhere(
+          (c) => c.id == categoryId,
+          orElse: () => CategoryModel(
+            id: -1,
+            name: 'Unknown',
+            monthlyLimit: 0,
+            colorHex: '0xFF9E9E9E',
+            iconCode: Icons.help_outline.codePoint,
+          ),
+        );
+        legendItems.add(
+          _buildLegendIndicator(
+            category.color,
+            category.name,
+            amount / totalBudget * 100,
+            currencySymbol,
+            icon: category.icon,
+          ),
+        );
+      }
+    });
+
     // Add the "Remaining" indicator if there is money left
     final remaining = (totalBudget - totalSpent).clamp(0.0, totalBudget);
     if (remaining > 0) {
@@ -657,6 +676,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           l10n.remaining,
           remaining / totalBudget * 100,
           currencySymbol,
+          icon: Icons.account_balance_wallet,
         ),
       );
     }
@@ -691,6 +711,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             category.name,
             category.monthlyLimit / totalBudget * 100,
             '',
+            icon: category.icon,
           ),
         );
       }
@@ -713,16 +734,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     Color color,
     String name,
     double amount,
-    String currency,
-  ) {
+    String currency, {
+    IconData? icon,
+  }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        ),
+        if (icon != null)
+          Icon(icon, size: 14, color: color)
+        else
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
         const SizedBox(width: 6),
         Text(
           '$name (%${amount.toStringAsFixed(0)})',
@@ -737,13 +762,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     double amount,
     Color color,
     String currency,
-    Color ThemeColor,
+    Color themeColor,
     bool isDarkMode,
   ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: ThemeColor,
+        color: themeColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: isDarkMode
             ? [

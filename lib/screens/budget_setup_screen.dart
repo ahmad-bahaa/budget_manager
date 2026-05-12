@@ -71,12 +71,11 @@ class BudgetSetupScreen extends ConsumerWidget {
                     vertical: 8,
                   ),
                   leading: CircleAvatar(
-                    backgroundColor:
-                        Colors.grey.shade200, // Or use category.color
-                    child: const Icon(
-                      Icons.category,
-                      color: Colors.black54,
-                    ), // Or category.icon
+                    backgroundColor: category.color.withOpacity(0.1),
+                    child: Icon(
+                      category.icon,
+                      color: category.color,
+                    ),
                   ),
                   title: Text(
                     category.name,
@@ -120,7 +119,7 @@ class BudgetSetupScreen extends ConsumerWidget {
                         final amount = double.tryParse(value) ?? 0.0;
                         ref
                             .read(categoryBudgetsProvider.notifier)
-                            .setBudget(category.id as String, amount);
+                            .setBudget(category.id.toString(), amount);
                       },
                     ),
                   ),
