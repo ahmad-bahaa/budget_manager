@@ -120,8 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategoriesMessage => 'No categories found.';
 
   @override
-  String get noCategoriesWarning =>
-      'No categories found. Please add one first.';
+  String get noCategoriesWarning => 'No categories found. Please add one first.';
 
   @override
   String get setBudgetHint => 'Set a budget to see charts';
@@ -133,8 +132,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteCategoryTitle => 'Delete Category?';
 
   @override
-  String get deleteCategoryMessage =>
-      'This will delete all transactions in this category.';
+  String get deleteCategoryMessage => 'This will delete all transactions in this category.';
 
   @override
   String get deleteTransactionTitle => 'Delete Transaction?';
@@ -263,8 +261,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restoreBackupTitle => 'Restore Backup?';
 
   @override
-  String get restoreWarning =>
-      '⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.';
+  String get restoreWarning => '⚠️ Warning: This will overwrite all current data on this device with the backup file. This action cannot be undone.';
 
   @override
   String get cancel => 'Cancel';
@@ -279,20 +276,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get phoneNumber => 'Phone Number';
 
   @override
-  String get settingsShowcaseDescription =>
-      'Tap to open settings and change your preferences such as custom monthly cycle and Currency';
+  String get settingsShowcaseDescription => 'Tap to open settings and change your preferences such as custom monthly cycle and Currency';
 
   @override
-  String get budgetShowcaseDescription =>
-      'Here to track total budget that has been set when you add categories';
+  String get budgetShowcaseDescription => 'Here to track total budget that has been set when you add categories';
 
   @override
-  String get expensesShowcaseDescription =>
-      'Click here to see all your Expenses';
+  String get expensesShowcaseDescription => 'Click here to see all your Expenses';
 
   @override
-  String get addCategoryShowcaseDescription =>
-      'Click here to add a new category';
+  String get addCategoryShowcaseDescription => 'Click here to add a new category';
 
   @override
   String errorLabel(String error) {
@@ -351,7 +344,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cloudSync => 'Cloud Sync';
 
   @override
-  String get cloudSyncSubtitle => 'Sync your data with Google Drive';
+  String get cloudSyncSubtitle => 'Sync your data with Google Database';
 
   @override
   String get signInWithGoogle => 'Sign in with Google';
@@ -382,6 +375,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noInternet => 'No internet connection';
 
   @override
-  String get privacyDescription =>
-      'Your data is stored in your private Google Drive \'App Data\' folder, accessible only by this app.';
+  String get privacyDescription => 'Your data is stored in A private Google Database, accessible only by this app.';
+
+  @override
+  String get selectImageSource => 'Select Image Source';
+
+  @override
+  String get cameraSource => 'Camera';
+
+  @override
+  String get gallerySource => 'Gallery';
 }

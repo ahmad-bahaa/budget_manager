@@ -52,7 +52,7 @@ class GeminiBudgetService {
     return null;
   }
 
-  Future<Map<String, dynamic>?> parseReceiptText(String ocrText) async {
+  Future<Map<String, dynamic>?> parseReceiptText(String ocrText,) async {
     if (apiKey.isEmpty || ocrText.isEmpty) return null;
 
     final model = GenerativeModel(
@@ -60,9 +60,9 @@ class GeminiBudgetService {
       apiKey: apiKey,
       generationConfig: GenerationConfig(responseMimeType: 'application/json'),
     );
-
     final prompt = '''
-      Analyze this OCR text from a receipt and extract the total amount, date, and a short description (merchant name or items).
+      Analyze this OCR text from a receipt 
+      and extract the total amount, date, and a brief description of items bought.
       OCR Text:
       $ocrText
       
@@ -70,7 +70,7 @@ class GeminiBudgetService {
       {
         "amount": double,
         "date": "ISO8601 string or null",
-        "note": "string"
+        "description": "string"
       }
     ''';
 

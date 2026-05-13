@@ -92,5 +92,8 @@
   "addCategoryShowcaseDescription": "Cliquez ici pour ajouter une nouvelle catégorie",
   "errorLabel": "Erreur : {error}",
   "percentFormat": "({value}%)",
-  "percentage": "{value}%"
+  "percentage": "{value}%",
+  "selectImageSource": "Sélectionner la source de l'image",
+  "cameraSource": "Appareil photo",
+  "gallerySource": "Galerie"
 }

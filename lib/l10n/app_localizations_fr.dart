@@ -120,8 +120,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noCategoriesMessage => 'Aucune catégorie trouvée.';
 
   @override
-  String get noCategoriesWarning =>
-      'Aucune catégorie trouvée. Veuillez d\'abord en ajouter une.';
+  String get noCategoriesWarning => 'Aucune catégorie trouvée. Veuillez d\'abord en ajouter une.';
 
   @override
   String get setBudgetHint => 'Définissez un budget pour voir les graphiques';
@@ -133,15 +132,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get deleteCategoryTitle => 'Supprimer la catégorie ?';
 
   @override
-  String get deleteCategoryMessage =>
-      'Cela supprimera toutes les transactions de cette catégorie.';
+  String get deleteCategoryMessage => 'Cela supprimera toutes les transactions de cette catégorie.';
 
   @override
   String get deleteTransactionTitle => 'Supprimer la transaction ?';
 
   @override
-  String get deleteTransactionMessage =>
-      'Cette action ne peut pas être annulée.';
+  String get deleteTransactionMessage => 'Cette action ne peut pas être annulée.';
 
   @override
   String get categoryCreatedMessage => 'Catégorie créée avec succès';
@@ -258,15 +255,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get restoreData => 'Restaurer les données';
 
   @override
-  String get restoreSubtitle =>
-      'Importer des données depuis un fichier de sauvegarde';
+  String get restoreSubtitle => 'Importer des données depuis un fichier de sauvegarde';
 
   @override
   String get restoreBackupTitle => 'Restaurer la sauvegarde ?';
 
   @override
-  String get restoreWarning =>
-      '⚠️ Avertissement : Cela écrasera toutes les données actuelles sur cet appareil. Cette action est irréversible.';
+  String get restoreWarning => '⚠️ Avertissement : Cela écrasera toutes les données actuelles sur cet appareil. Cette action est irréversible.';
 
   @override
   String get cancel => 'Annuler';
@@ -281,20 +276,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get phoneNumber => 'Numéro de téléphone';
 
   @override
-  String get settingsShowcaseDescription =>
-      'Appuyez pour ouvrir les paramètres et modifier vos préférences telles que le cycle mensuel personnalisé et la devise';
+  String get settingsShowcaseDescription => 'Appuyez pour ouvrir les paramètres et modifier vos préférences telles que le cycle mensuel personnalisé et la devise';
 
   @override
-  String get budgetShowcaseDescription =>
-      'Ici pour suivre le budget total défini lors de l\'ajout de catégories';
+  String get budgetShowcaseDescription => 'Ici pour suivre le budget total défini lors de l\'ajout de catégories';
 
   @override
-  String get expensesShowcaseDescription =>
-      'Cliquez ici pour voir toutes vos dépenses';
+  String get expensesShowcaseDescription => 'Cliquez ici pour voir toutes vos dépenses';
 
   @override
-  String get addCategoryShowcaseDescription =>
-      'Cliquez ici pour ajouter une nouvelle catégorie';
+  String get addCategoryShowcaseDescription => 'Cliquez ici pour ajouter une nouvelle catégorie';
 
   @override
   String errorLabel(String error) {
@@ -353,7 +344,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cloudSync => 'Cloud Sync';
 
   @override
-  String get cloudSyncSubtitle => 'Sync your data with Google Drive';
+  String get cloudSyncSubtitle => 'Sync your data with Google Database';
 
   @override
   String get signInWithGoogle => 'Sign in with Google';
@@ -384,6 +375,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noInternet => 'No internet connection';
 
   @override
-  String get privacyDescription =>
-      'Your data is stored in your private Google Drive \'App Data\' folder, accessible only by this app.';
+  String get privacyDescription => 'Your data is stored in A private Google Database, accessible only by this app.';
+
+  @override
+  String get selectImageSource => 'Sélectionner la source de l\'image';
+
+  @override
+  String get cameraSource => 'Appareil photo';
+
+  @override
+  String get gallerySource => 'Galerie';
 }

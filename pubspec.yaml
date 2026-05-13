@@ -2,7 +2,7 @@ name: budget_manager
 description: "Track expenses, set budgets, and manage your money with complete offline privacy."
 publish_to: 'none'
 
-version: 3.9.0+10
+version: 4.0.0+11
 
 environment:
   sdk: ^3.10.7

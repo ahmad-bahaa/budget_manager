@@ -120,8 +120,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noCategoriesMessage => 'لم يتم العثور على فئات.';
 
   @override
-  String get noCategoriesWarning =>
-      'لم يتم العثور على فئات. يرجى إضافة فئة أولاً.';
+  String get noCategoriesWarning => 'لم يتم العثور على فئات. يرجى إضافة فئة أولاً.';
 
   @override
   String get setBudgetHint => 'حدد ميزانية لرؤية المخططات';
@@ -133,8 +132,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get deleteCategoryTitle => 'حذف الفئة؟';
 
   @override
-  String get deleteCategoryMessage =>
-      'سيؤدي هذا إلى حذف جميع العمليات في هذه الفئة.';
+  String get deleteCategoryMessage => 'سيؤدي هذا إلى حذف جميع العمليات في هذه الفئة.';
 
   @override
   String get deleteTransactionTitle => 'حذف العملية؟';
@@ -263,8 +261,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get restoreBackupTitle => 'استعادة النسخة الاحتياطية؟';
 
   @override
-  String get restoreWarning =>
-      '⚠️ تحذير: سيؤدي هذا إلى استبدال جميع البيانات الحالية على هذا الجهاز بملف النسخ الاحتياطي. لا يمكن التراجع عن هذا الإجراء.';
+  String get restoreWarning => '⚠️ تحذير: سيؤدي هذا إلى استبدال جميع البيانات الحالية على هذا الجهاز بملف النسخ الاحتياطي. لا يمكن التراجع عن هذا الإجراء.';
 
   @override
   String get cancel => 'إلغاء';
@@ -279,12 +276,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get phoneNumber => 'رقم الهاتف';
 
   @override
-  String get settingsShowcaseDescription =>
-      'اضغط لفتح الإعدادات وتغيير تفضيلاتك مثل الدورة الشهرية المخصصة والعملة';
+  String get settingsShowcaseDescription => 'اضغط لفتح الإعدادات وتغيير تفضيلاتك مثل الدورة الشهرية المخصصة والعملة';
 
   @override
-  String get budgetShowcaseDescription =>
-      'هنا لمتابعة إجمالي الميزانية التي تم تحديدها عند إضافة الفئات';
+  String get budgetShowcaseDescription => 'هنا لمتابعة إجمالي الميزانية التي تم تحديدها عند إضافة الفئات';
 
   @override
   String get expensesShowcaseDescription => 'اضغط هنا لمشاهدة جميع مصروفاتك';
@@ -380,6 +375,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noInternet => 'لا يوجد اتصال بالإنترنت';
 
   @override
-  String get privacyDescription =>
-      'يتم تخزين بياناتك في مجلد \'بيانات التطبيق\' الخاص بك على جوجل درايف، ولا يمكن لأحد الوصول إليه غير هذا التطبيق.';
+  String get privacyDescription => 'يتم تخزين بياناتك في مجلد \'بيانات التطبيق\' الخاص بك على جوجل درايف، ولا يمكن لأحد الوصول إليه غير هذا التطبيق.';
+
+  @override
+  String get selectImageSource => 'اختر مصدر الصورة';
+
+  @override
+  String get cameraSource => 'الكاميرا';
+
+  @override
+  String get gallerySource => 'المعرض';
 }

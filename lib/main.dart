@@ -4,9 +4,7 @@ import 'package:budget_manager/providers/language_provider.dart';
 import 'package:budget_manager/screens/onboarding_screen.dart';
 import 'package:budget_manager/screens/splash_screen.dart';
 import 'package:budget_manager/services/home_widget_service.dart';
-import 'package:budget_manager/screens/add_transaction_screen.dart';
 import 'package:budget_manager/providers/home_widget_provider.dart';
-import 'package:budget_manager/utils/transparent_route.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
@@ -76,43 +74,7 @@ class _BudgetAppState extends ConsumerState<BudgetApp> {
   }
 
   void _onWidgetClick(Uri? uri) {
-    if (uri == null) return;
-    
-    Future.delayed(const Duration(milliseconds: 500), () {
-      final context = navigatorKey.currentContext;
-      if (context == null) return;
-
-      if (uri.host == 'add_transaction') {
-        // Push a transparent route that shows the bottom sheet
-        navigatorKey.currentState?.push(
-          TransparentRoute(
-            builder: (ctx) => Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Center(
-                child: Container(), // Empty, bottom sheet will slide over
-              ),
-            ),
-          ),
-        );
-
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          useSafeArea: true,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          builder: (_) => const AddTransactionScreen(),
-        ).then((_) {
-          // When the bottom sheet is closed, if we are in this special mode,
-          // close the app to return to the home screen.
-          if (navigatorKey.currentState?.canPop() ?? false) {
-             navigatorKey.currentState?.pop(); // Pop the transparent route
-          }
-          SystemNavigator.pop(); // Close the app
-        });
-      }
-    });
+    // Standard app launch
   }
 
   @override

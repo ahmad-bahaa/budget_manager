@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -6,20 +7,18 @@ class HomeWidgetService {
   static const String _androidWidgetName = 'BudgetWidgetProvider';
 
   static Future<void> updateWidget({
-    required double remainingBudget,
-    required String currency,
+    required List<Map<String, dynamic>> categoriesData,
   }) async {
     try {
-      debugPrint('Updating HomeWidget with remainingBudget: $remainingBudget');
+      debugPrint('Updating HomeWidget with categories data');
       
-      final budgetString = '$currency${remainingBudget.toStringAsFixed(2)}';
+      final String encodedData = jsonEncode(categoriesData);
 
-      await HomeWidget.saveWidgetData<String>('budget_value', budgetString);
-      await HomeWidget.saveWidgetData<String>('currency', currency);
+      await HomeWidget.saveWidgetData<String>('categories_data', encodedData);
 
       await HomeWidget.updateWidget(
         androidName: _androidWidgetName,
-        iOSName: 'BudgetWidget', // Name of the Widget in iOS
+        iOSName: 'BudgetWidget',
       );
     } catch (e) {
       debugPrint('Error updating HomeWidget: $e');

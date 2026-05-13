@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:math_expressions/math_expressions.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/transaction_model.dart';
 import '../providers/budget_providers.dart';
 import '../providers/api_key_provider.dart';
@@ -57,17 +58,36 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _scanReceipt() async {
     final apiKey = ref.read(apiKeyProvider);
     if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please set your Gemini API key in Settings first.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showApiKeyMissingDialog(context);
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
+    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: Text(l10n.cameraSource),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: Text(l10n.gallerySource),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
     final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.camera);
+    final image = await picker.pickImage(source: source);
 
     if (image != null) {
       setState(() {
@@ -80,20 +100,22 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
           final apiKey = ref.read(apiKeyProvider);
           if (apiKey.isNotEmpty) {
             final gemini = GeminiBudgetService(apiKey: apiKey);
-            final result = await gemini.parseReceiptText(ocrText);
+            final result = await gemini.parseReceiptText(ocrText,);
             if (result != null) {
               setState(() {
                 if (result['amount'] != null) {
                   _amountController.text = result['amount'].toString();
                 }
-                if (result['note'] != null) {
-                  _noteController.text = result['note'];
+                if (result['description'] != null) {
+                  _noteController.text = result['description'];
                 }
                 if (result['date'] != null) {
                   try {
                     _selectedDate = DateTime.parse(result['date']);
                   } catch (_) {}
                 }
+                _suggestCategory();
+
               });
             }
           }
@@ -111,12 +133,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
   Future<void> _suggestCategory() async {
     final apiKey = ref.read(apiKeyProvider);
     if (apiKey.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please set your Gemini API key in Settings first.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      _showApiKeyMissingDialog(context);
       return;
     }
 
@@ -151,6 +168,73 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
         _isSuggestingCategory = false;
       });
     }
+  }
+
+  void _showApiKeyMissingDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Gemini API Key Required'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'To use AI features, please provide a Gemini API key.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: controller,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'API Key',
+                hintText: 'Enter your API key here',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () => launchUrl(
+                Uri.parse('https://aistudio.google.com/app/apikey'),
+                mode: LaunchMode.externalApplication,
+              ),
+              child: const Text(
+                'Get a free API key from Google AI Studio',
+                style: TextStyle(
+                  fontSize: 12,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (controller.text.trim().isNotEmpty) {
+                ref.read(apiKeyProvider.notifier).setKey(controller.text.trim());
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('API Key saved successfully!'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _presentDatePicker() async {

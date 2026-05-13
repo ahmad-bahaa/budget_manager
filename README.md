@@ -14,8 +14,9 @@ Budget Manager is a powerful, privacy-focused expense tracking and budgeting app
 
 ### 🤖 AI-Powered Tools (Powered by Gemini)
 - **AI Budget Advisor**: Get personalized financial advice and insights based on your spending habits.
-- **Smart Receipt Scanning**: Use OCR and Gemini AI to automatically extract amounts, notes, and dates from your receipts.
+- **Smart Receipt Scanning**: Use OCR and Gemini AI to automatically extract amounts, notes, and dates from your receipts. Now supports scanning from both **Camera** and **Gallery**.
 - **Category Suggestions**: AI helps you categorize your expenses based on your transaction notes.
+- **Improved AI Setup**: Easily configure your Gemini API key through an interactive dialog with direct links to Google AI Studio.
 
 ### 🔒 Privacy & Security
 - **Offline First**: Your financial data stays on your device.

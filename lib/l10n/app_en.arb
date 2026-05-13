@@ -178,5 +178,8 @@
     }
   },
   "noInternet": "No internet connection",
-  "privacyDescription": "Your data is stored in A private Google Database, accessible only by this app."
+  "privacyDescription": "Your data is stored in A private Google Database, accessible only by this app.",
+  "selectImageSource": "Select Image Source",
+  "cameraSource": "Camera",
+  "gallerySource": "Gallery"
 }
