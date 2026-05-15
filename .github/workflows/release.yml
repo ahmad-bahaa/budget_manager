@@ -32,7 +32,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build AppBundle
-        run: flutter build appbundle --release
+        run: flutter build appbundle --release --no-tree-shake-icons
         # Note: For signed builds, keystore secrets must be configured in GitHub Secrets
         # and referenced in android/app/build.gradle
         # env:

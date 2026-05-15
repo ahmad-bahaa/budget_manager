@@ -73,7 +73,8 @@ class _AIAdvisorScreenState extends ConsumerState<AIAdvisorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final apiKey = ref.read(apiKeyProvider);
+    // Watch the apiKeyProvider to ensure it's loaded as soon as possible
+    final apiKey = ref.watch(apiKeyProvider);
     final l10n = AppLocalizations.of(context)!;
     final categories = ref.watch(categoriesProvider).value ?? [];
 

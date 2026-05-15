@@ -293,6 +293,8 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final l10n = AppLocalizations.of(context)!;
     final categoriesState = ref.watch(categoriesProvider);
     final currency = ref.watch(currencyProvider);
+    // Watch the apiKeyProvider to ensure it's loaded as soon as possible
+    ref.watch(apiKeyProvider);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(

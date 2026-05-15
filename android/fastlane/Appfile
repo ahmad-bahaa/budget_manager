@@ -1,0 +1,2 @@
+json_key_file("fastlane-api-key.json") # Path to the json secret file - balanced with GitHub Secrets
+package_name("com.ninjageeksco.budget_manager") # Your app identifier
